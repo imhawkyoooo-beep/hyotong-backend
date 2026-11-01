@@ -69,7 +69,23 @@ let lastSafetySnapshotAt = 0;
 const JSON_TYPE = 'application/json; charset=utf-8';
 function send(res,status,body,type='text/plain; charset=utf-8',headers={}) { res.writeHead(status,{'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Permissions-Policy':'camera=(), microphone=(), geolocation=()',...headers}); res.end(body); }
 const sendJson = (res,status,obj,headers) => send(res,status,JSON.stringify(obj),JSON_TYPE,headers);
-function originAllowed(req) { const origin=req.headers.origin; if(!origin) return true; try { return new URL(origin).host === req.headers.host; } catch { return false; } }
+
+function originAllowed(req) {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  try {
+    const u = new URL(origin);
+    const allowed = new Set([
+      'https://hyoshin-erp.com',
+      'https://www.hyoshin-erp.com'
+    ]);
+    const extra = (process.env.ALLOWED_ORIGINS || '')
+      .split(',').map(v => v.trim()).filter(Boolean);
+    return allowed.has(u.origin) || extra.includes(u.origin) || u.host === req.headers.host;
+  } catch {
+    return false;
+  }
+}
 function requireSameOrigin(req,res) { if (!originAllowed(req)) { sendJson(res,403,{ok:false,error:'요청 출처가 올바르지 않습니다.'}); return false; } return true; }
 function getSession(req) { const m=(req.headers.cookie||'').match(/(?:^|; )hs_session=([A-Za-z0-9_-]+)/); if(!m) return null; const s=sessions.get(m[1]); if(!s || s.expires<Date.now()){sessions.delete(m[1]);return null;} s.expires=Date.now()+8*60*60*1000; return m[1]; }
 function requireAuth(req,res) { if(getSession(req)) return true; sendJson(res,401,{ok:false,error:'login_required'}); return false; }
