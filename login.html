@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>효통 로그인</title><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f1f5f9;font-family:Arial,"Malgun Gothic",sans-serif;color:#111827}
+.card{width:min(420px,calc(100% - 32px));background:white;border-radius:18px;padding:32px;box-shadow:0 12px 40px #0f172a18}
+h1{margin:0 0 6px;font-size:26px}.sub{color:#64748b;margin-bottom:26px;font-size:14px}
+label{display:block;font-size:13px;margin:14px 0 6px;color:#475569}
+input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}
+button{width:100%;margin-top:22px;border:0;border-radius:9px;background:#2563eb;color:white;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.msg{margin-top:14px;color:#b91c1c;font-size:13px;min-height:20px}
+</style></head><body><main class="card"><h1>효통</h1><div class="sub">효신통합관리 · 대표이사 경영관리 시스템</div>
+<form id="loginForm"><label for="username">아이디</label><input id="username" name="username" autocomplete="username" value="admin" required>
+<label for="password">비밀번호</label><input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+<button id="submit" type="submit">로그인</button><div class="msg" id="message" role="alert"></div></form></main>
+<script>
+const form=document.getElementById('loginForm'),btn=document.getElementById('submit'),msg=document.getElementById('message');
+form.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='';btn.disabled=true;btn.textContent='확인 중…';
+try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:form.username.value.trim(),password:form.password.value})});
+const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'로그인에 실패했습니다.');location.replace('/');}
+catch(err){msg.textContent=err.message||'서버 연결을 확인해 주세요.';}finally{btn.disabled=false;btn.textContent='로그인';}});
+</script></body></html>

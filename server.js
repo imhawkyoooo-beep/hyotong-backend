@@ -1,0 +1,245 @@
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+const ROOT = __dirname;
+// Render persistent disk mount path is supplied as DATA_DIR=/var/data.
+// Local development falls back to the application folder.
+const DATA_ROOT = process.env.DATA_DIR || ROOT;
+fs.mkdirSync(DATA_ROOT, {recursive:true});
+const DB_FILE = path.join(DATA_ROOT, 'data.json');
+const AUTH_FILE = path.join(DATA_ROOT, 'auth.json');
+const UPLOAD_DIR = path.join(DATA_ROOT, 'uploads');
+const BACKUP_DIR = path.join(DATA_ROOT, 'backups');
+const PORT = Number(process.env.PORT || 10000);
+const USER = process.env.HS_USER || 'admin';
+const DEFAULT_DB = {projects:[],assets:[],finance:[],tax:[],employees:[],sales:[],cashflow:[],files:[]};
+fs.mkdirSync(UPLOAD_DIR, {recursive:true});
+fs.mkdirSync(BACKUP_DIR, {recursive:true});
+const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
+// 파일 자동분류 카테고리 = uploads 아래 폴더 이름
+const CATEGORIES = ['사업관리','부동산자산','재무자금','세무회계','인사','영업분양','기타문서'];
+const MAX_UPLOAD = 100 * 1024 * 1024;
+
+/* ---------- 비밀번호: 처음 한 번 설정하면 auth.json에 암호화(scrypt)해서 저장 ---------- */
+function hashPassword(pw, salt) { return crypto.scryptSync(pw, salt, 64).toString('hex'); }
+if (process.argv.includes('--set-password')) {
+  const pw = process.env.HS_NEWPASS || '';
+  if (pw.length < 12) { console.error('비밀번호는 12자 이상이어야 합니다.'); process.exit(1); }
+  const salt = crypto.randomBytes(16).toString('hex');
+  let user = USER; // 비밀번호만 바꾸고 기존 아이디는 유지
+  try { user = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8')).user || USER; } catch {}
+  fs.writeFileSync(AUTH_FILE, JSON.stringify({user, salt, hash: hashPassword(pw, salt)}, null, 2), 'utf8');
+  console.log('비밀번호를 저장했습니다.');
+  process.exit(0);
+}
+// 이전 버전의 login.json(아이디·비밀번호 평문)이 있으면 같은 아이디/비밀번호로 암호화 저장 후 평문 파일 삭제
+const LEGACY_LOGIN = path.join(ROOT, 'login.json');
+if (!fs.existsSync(AUTH_FILE) && fs.existsSync(LEGACY_LOGIN)) {
+  try {
+    const old = JSON.parse(fs.readFileSync(LEGACY_LOGIN, 'utf8'));
+    if (String(old.password || '').length >= 12) {
+      const salt = crypto.randomBytes(16).toString('hex');
+      fs.writeFileSync(AUTH_FILE, JSON.stringify({user: String(old.username || USER), salt, hash: hashPassword(String(old.password), salt)}, null, 2), 'utf8');
+      fs.rmSync(LEGACY_LOGIN, {force: true});
+      console.log('기존 login.json의 아이디/비밀번호를 그대로 옮겨 암호화 저장했습니다.');
+    } else console.error('login.json의 비밀번호가 12자 미만이라 옮기지 않았습니다. 한번에시작.bat에서 새로 설정하세요.');
+  } catch (err) { console.error('login.json을 읽지 못했습니다:', err.message); }
+}
+let authConfig = null;
+try { authConfig = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8')); } catch {}
+const ENV_PASS = process.env.HS_PASS || '';
+if (ENV_PASS.length < 12 && !(authConfig && authConfig.salt && authConfig.hash)) {
+  console.error('보안 오류: 비밀번호가 설정되지 않았습니다. 한번에시작.bat을 실행해 12자 이상의 비밀번호를 설정하세요.');
+  process.exit(1);
+}
+function checkPassword(u, p) {
+  if (ENV_PASS.length >= 12) {
+    const pb = Buffer.from(p, 'utf8'), eb = Buffer.from(ENV_PASS, 'utf8');
+    return u === USER && pb.length === eb.length && crypto.timingSafeEqual(pb, eb);
+  }
+  const got = Buffer.from(hashPassword(p, authConfig.salt), 'hex'), want = Buffer.from(authConfig.hash, 'hex');
+  return u === (authConfig.user || USER) && got.length === want.length && crypto.timingSafeEqual(got, want);
+}
+
+const sessions = new Map();
+const loginAttempts = new Map();
+let lastSafetySnapshotAt = 0;
+const JSON_TYPE = 'application/json; charset=utf-8';
+function send(res,status,body,type='text/plain; charset=utf-8',headers={}) { res.writeHead(status,{'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Permissions-Policy':'camera=(), microphone=(), geolocation=()',...headers}); res.end(body); }
+const sendJson = (res,status,obj,headers) => send(res,status,JSON.stringify(obj),JSON_TYPE,headers);
+function originAllowed(req) { const origin=req.headers.origin; if(!origin) return true; try { return new URL(origin).host === req.headers.host; } catch { return false; } }
+function requireSameOrigin(req,res) { if (!originAllowed(req)) { sendJson(res,403,{ok:false,error:'요청 출처가 올바르지 않습니다.'}); return false; } return true; }
+function getSession(req) { const m=(req.headers.cookie||'').match(/(?:^|; )hs_session=([A-Za-z0-9_-]+)/); if(!m) return null; const s=sessions.get(m[1]); if(!s || s.expires<Date.now()){sessions.delete(m[1]);return null;} s.expires=Date.now()+8*60*60*1000; return m[1]; }
+function requireAuth(req,res) { if(getSession(req)) return true; sendJson(res,401,{ok:false,error:'login_required'}); return false; }
+function readDb(){try { const d=JSON.parse(fs.readFileSync(DB_FILE,'utf8')); if(!d || typeof d!=='object' || Array.isArray(d)) throw new Error('invalid database'); for(const k of REQUIRED_DB_KEYS) if(!Array.isArray(d[k])) d[k]=[]; return d; } catch(err) { if(fs.existsSync(DB_FILE)) console.error('데이터 파일을 읽지 못했습니다. 빈 데이터로 덮어쓰지 않도록 저장 요청을 확인하세요:',err.message); return {...DEFAULT_DB}; }}
+function validDb(d){return !!d && typeof d==='object' && !Array.isArray(d) && REQUIRED_DB_KEYS.every(k=>Array.isArray(d[k]));}
+function readBody(req,limit,cb){
+  let body='', tooLarge=false;
+  req.on('data',c=>{ if(tooLarge) return; body+=c; if(body.length>limit){ tooLarge=true; body=''; } });
+  req.on('end',()=>cb(tooLarge?null:body, tooLarge));
+}
+function writeDb(d){ const tmp=DB_FILE+'.tmp'; fs.writeFileSync(tmp,JSON.stringify(d,null,2),'utf8'); fs.renameSync(tmp,DB_FILE); }
+// 잦은 저장 중 실수나 오류에 대비해 최대 5분에 한 번 저장 직전 DB 사본을 보관합니다.
+function makeSafetySnapshot(){
+  try {
+    if(!fs.existsSync(DB_FILE)) return;
+    const now=Date.now(); if(now-lastSafetySnapshotAt<5*60*1000) return;
+    fs.mkdirSync(BACKUP_DIR,{recursive:true});
+    const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+    fs.copyFileSync(DB_FILE,path.join(BACKUP_DIR,`save-before-${stamp}.json`));
+    lastSafetySnapshotAt=now;
+    const list=fs.readdirSync(BACKUP_DIR).filter(n=>n.startsWith('save-before-')&&n.endsWith('.json')).map(name=>({name,time:fs.statSync(path.join(BACKUP_DIR,name)).mtimeMs})).sort((a,b)=>b.time-a.time);
+    for(const old of list.slice(30)) fs.rmSync(path.join(BACKUP_DIR,old.name),{force:true});
+  } catch(err) { console.error('저장 전 안전 사본 생성 실패:',err.message); }
+}
+function safeName(s){return path.basename(String(s||'file').replace(/[\\/\0]/g,'_')).replace(/[^\p{L}\p{N}._() -]/gu,'_').replace(/^[.\s]+/,'_').slice(0,150)||'file';}
+function decodeParam(v){ try { return decodeURIComponent(v||''); } catch { return ''; } }
+// "카테고리/파일명" 경로가 uploads 폴더 밖으로 나가지 않는지 확인
+function resolveUpload(rel){ const f=path.resolve(UPLOAD_DIR,String(rel||'')); return f.startsWith(UPLOAD_DIR+path.sep)?f:null; }
+// 자동 백업: 데이터 JSON과 첨부파일을 같은 시점의 폴더로 보관합니다.
+function makeAutomaticBackup(reason='scheduled') {
+  try {
+    if (!fs.existsSync(DB_FILE) && !fs.existsSync(UPLOAD_DIR)) return;
+    fs.mkdirSync(BACKUP_DIR,{recursive:true});
+    const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+    const dir=path.join(BACKUP_DIR,`auto-${stamp}-${reason}`);
+    fs.mkdirSync(dir,{recursive:false});
+    if(fs.existsSync(DB_FILE)) fs.copyFileSync(DB_FILE,path.join(dir,'data.json'));
+    if(fs.existsSync(UPLOAD_DIR)) fs.cpSync(UPLOAD_DIR,path.join(dir,'uploads'),{recursive:true,errorOnExist:false});
+    fs.writeFileSync(path.join(dir,'BACKUP_INFO.txt'),`효신통합관리 자동 백업\n생성시각: ${new Date().toISOString()}\n유형: ${reason}\n포함: data.json 및 uploads 폴더(존재하는 경우)\n이 폴더를 삭제하거나 수정하기 전에 별도 복사본을 보관하세요.\n`,'utf8');
+    const backups=fs.readdirSync(BACKUP_DIR,{withFileTypes:true})
+      .filter(e=>e.isDirectory()&&e.name.startsWith('auto-'))
+      .map(e=>({name:e.name,time:fs.statSync(path.join(BACKUP_DIR,e.name)).mtimeMs}))
+      .sort((a,b)=>b.time-a.time);
+    for(const old of backups.slice(14)) fs.rmSync(path.join(BACKUP_DIR,old.name),{recursive:true,force:true});
+    console.log('자동 백업 완료:',dir);
+  } catch(err) { console.error('자동 백업 실패:',err.message); }
+}
+const FILE_TYPES={'.pdf':'application/pdf','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.webp':'image/webp','.txt':'text/plain; charset=utf-8'};
+
+function handleUpload(req,res,url){
+  const name=safeName(decodeParam(url.searchParams.get('name')));
+  const reqCat=decodeParam(url.searchParams.get('category'));
+  const cat=CATEGORIES.includes(reqCat)?reqCat:'기타문서';
+  const dir=path.join(UPLOAD_DIR,cat);
+  fs.mkdirSync(dir,{recursive:true});
+  const stored=Date.now()+'_'+crypto.randomBytes(4).toString('hex')+'_'+name;
+  const dest=path.join(dir,stored);
+  const stream=fs.createWriteStream(dest,{flags:'wx'}); let size=0, failed=false;
+  const fail=(code,error)=>{ if(failed) return; failed=true; stream.destroy(); fs.rm(dest,{force:true},()=>{}); if(!res.headersSent) sendJson(res,code,{ok:false,error}); };
+  req.on('data',c=>{ size+=c.length; if(size>MAX_UPLOAD){ fail(413,'파일은 100MB 이하만 업로드할 수 있습니다.'); req.unpipe(stream); req.resume(); } });
+  req.on('aborted',()=>fail(400,'업로드가 중단되었습니다.'));
+  stream.on('error',()=>fail(500,'파일 저장에 실패했습니다.'));
+  stream.on('finish',()=>{ if(!failed) sendJson(res,201,{ok:true,path:cat+'/'+stored,size}); });
+  req.pipe(stream);
+}
+
+const server=http.createServer((req,res)=>{
+  const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
+  if(url.pathname==='/api/login' && req.method==='POST'){
+    if(!requireSameOrigin(req,res)) return;
+    return readBody(req,10000,body=>{
+      let d={}; try{d=JSON.parse(body||'{}')}catch{}
+      const ip=req.socket.remoteAddress||'unknown'; const a=loginAttempts.get(ip)||{count:0,until:0};
+      if(a.until>Date.now()) return sendJson(res,429,{ok:false,error:'잠시 후 다시 시도하세요.'});
+      if(!checkPassword(String(d.username||''),String(d.password||''))){a.count++; if(a.count>=5){a.count=0;a.until=Date.now()+30000;} loginAttempts.set(ip,a); return sendJson(res,401,{ok:false,error:'아이디 또는 비밀번호를 확인하세요.'});}
+      loginAttempts.delete(ip); const token=crypto.randomBytes(32).toString('base64url'); sessions.set(token,{expires:Date.now()+8*60*60*1000});
+      const secure = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim() === 'https';
+      return sendJson(res,200,{ok:true},{'Set-Cookie':`hs_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800${secure?'; Secure':''}`});
+    });
+  }
+  if(url.pathname==='/api/logout' && req.method==='POST'){
+    if(!requireSameOrigin(req,res)) return;const t=getSession(req);if(t)sessions.delete(t);const secure=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';return sendJson(res,200,{ok:true},{'Set-Cookie':`hs_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secure?'; Secure':''}`});}
+  if(url.pathname==='/login.html' && (req.method==='GET'||req.method==='HEAD')) { res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}); return fs.createReadStream(path.join(ROOT,'login.html')).pipe(res); }
+  if(url.pathname==='/api/health' && req.method==='GET') return sendJson(res,200,{ok:true,app:'효신통합관리'});
+  if(url.pathname.startsWith('/api/')){
+    if(!requireAuth(req,res)) return;
+    if(url.pathname==='/api/db'&&req.method==='GET') return sendJson(res,200,readDb());
+    if(url.pathname==='/api/db'&&req.method==='POST'){
+      if(!requireSameOrigin(req,res)) return;
+      return readBody(req,20_000_000,(body,tooLarge)=>{
+        if(tooLarge) return sendJson(res,413,{ok:false,error:'too_large'});
+        let d; try{d=JSON.parse(body)}catch{return sendJson(res,400,{ok:false,error:'invalid_json'});}
+        if(!validDb(d)) return sendJson(res,400,{ok:false,error:'데이터 형식이 올바르지 않아 저장을 중단했습니다. 기존 자료는 유지됩니다.'});
+        makeSafetySnapshot(); writeDb(d); sendJson(res,200,{ok:true});
+      });
+    }
+    if(url.pathname==='/api/backup'&&req.method==='GET') {
+      const payload=JSON.stringify({exportedAt:new Date().toISOString(),database:readDb()},null,2);
+      return send(res,200,payload,JSON_TYPE,{'Content-Disposition':`attachment; filename*=UTF-8''hyoshin-backup-${new Date().toISOString().slice(0,10)}.json`});
+    }
+    if(url.pathname==='/api/restore'&&req.method==='POST'){
+      if(!requireSameOrigin(req,res)) return;
+      return readBody(req,20_000_000,(body,tooLarge)=>{
+        if(tooLarge) return sendJson(res,413,{ok:false,error:'백업 파일은 20MB 이하만 복원할 수 있습니다.'});
+        try {
+          const payload=JSON.parse(body); const d=payload && payload.database ? payload.database : payload;
+          if(!d || typeof d!=='object' || Array.isArray(d)) throw new Error('invalid');
+          const clean={}; for(const k of REQUIRED_DB_KEYS){ if(d[k]!==undefined && !Array.isArray(d[k])) throw new Error('invalid'); clean[k]=Array.isArray(d[k])?d[k]:[]; }
+          makeAutomaticBackup('before-restore');
+          writeDb(clean);
+          sendJson(res,200,{ok:true,message:'복원 완료. 복원 전 데이터는 backups 폴더에 보관했습니다.'});
+        } catch { sendJson(res,400,{ok:false,error:'백업 JSON 형식이 올바르지 않습니다. 데이터는 변경되지 않았습니다.'}); }
+      });
+    }
+    if(url.pathname==='/api/upload'&&req.method==='POST'){
+      if(!requireSameOrigin(req,res)) return;
+      return handleUpload(req,res,url);
+    }
+    if(url.pathname==='/api/file'&&req.method==='GET'){
+      const f=resolveUpload(url.searchParams.get('path'));
+      if(!f||!fs.existsSync(f)||!fs.statSync(f).isFile()) return send(res,404,'Not Found');
+      const ext=path.extname(f).toLowerCase();
+      const original=path.basename(f).replace(/^\d+_[0-9a-f]{8}_/,'');
+      const inline=FILE_TYPES[ext] && url.searchParams.get('dl')!=='1';
+      res.writeHead(200,{'Content-Type':inline?FILE_TYPES[ext]:'application/octet-stream','Content-Disposition':`${inline?'inline':'attachment'}; filename*=UTF-8''${encodeURIComponent(original)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'});
+      return fs.createReadStream(f).pipe(res);
+    }
+    if(url.pathname==='/api/files/move'&&req.method==='POST'){
+      if(!requireSameOrigin(req,res)) return;
+      return readBody(req,10000,body=>{
+        let d={}; try{d=JSON.parse(body||'{}')}catch{}
+        const from=resolveUpload(d.path);
+        if(!from||!CATEGORIES.includes(d.category)||!fs.existsSync(from)) return sendJson(res,400,{ok:false,error:'파일을 찾을 수 없습니다.'});
+        const dir=path.join(UPLOAD_DIR,d.category); fs.mkdirSync(dir,{recursive:true});
+        const base=path.basename(from);
+        try { fs.renameSync(from,path.join(dir,base)); } catch { return sendJson(res,500,{ok:false,error:'파일 이동에 실패했습니다.'}); }
+        sendJson(res,200,{ok:true,path:d.category+'/'+base});
+      });
+    }
+    if(url.pathname==='/api/files/delete'&&req.method==='POST'){
+      if(!requireSameOrigin(req,res)) return;
+      return readBody(req,10000,body=>{
+        let d={}; try{d=JSON.parse(body||'{}')}catch{}
+        const f=resolveUpload(d.path);
+        if(!f) return sendJson(res,400,{ok:false,error:'잘못된 요청입니다.'});
+        fs.rm(f,{force:true},()=>sendJson(res,200,{ok:true}));
+      });
+    }
+    return send(res,404,'Not Found');
+  }
+  if(!getSession(req)){ if(req.method==='GET'||req.method==='HEAD') {res.writeHead(302,{Location:'/login.html','Cache-Control':'no-store'});return res.end();} return send(res,401,'로그인이 필요합니다.'); }
+  if(req.method!=='GET'&&req.method!=='HEAD') return send(res,405,'Method Not Allowed');
+  // 화면 파일만 제공 (데이터·비밀번호·백업·첨부 폴더는 직접 접근 불가)
+  const requested=url.pathname==='/'?'index.html':decodeParam(url.pathname.slice(1));
+  const file=path.resolve(ROOT,requested);
+  const blocked=[DB_FILE,AUTH_FILE].includes(file)||[UPLOAD_DIR,BACKUP_DIR].some(d=>file.startsWith(d+path.sep))||/\.(js|ps1|bat|json|tmp)$/i.test(file);
+  if(!file.startsWith(ROOT+path.sep)||blocked||!fs.existsSync(file)||!fs.statSync(file).isFile())return send(res,404,'Not Found');
+  const ext=path.extname(file).toLowerCase();const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon'};
+  res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','Cache-Control':'no-store'});if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);
+});
+server.on('error',err=>{
+  if(err.code==='EADDRINUSE') console.error(`[오류] ${PORT}번 포트를 이미 다른 프로그램이 사용 중입니다. 이전 서버 창을 닫고 다시 실행하세요.`);
+  else console.error('[오류] 서버 시작 실패:',err.message);
+  process.exit(1);
+});
+server.listen(PORT,'0.0.0.0',()=>{console.log('효신통합관리 서버 실행: http://localhost:'+PORT);console.log('로그인 아이디: '+((authConfig&&authConfig.user)||USER));console.log('서버를 종료하려면 이 창에서 Ctrl+C를 누르세요.');});
+
+// 서버가 켜져 있는 동안 6시간마다 자동 백업. 기존 자료가 없으면 빈 백업은 만들지 않습니다.
+const backupTimer=setInterval(()=>makeAutomaticBackup('scheduled'),6*60*60*1000);
+backupTimer.unref();
+server.on('close',()=>clearInterval(backupTimer));
+process.on('SIGINT',()=>{makeAutomaticBackup('shutdown');server.close(()=>process.exit(0));});
+process.on('SIGTERM',()=>{makeAutomaticBackup('shutdown');server.close(()=>process.exit(0));});
