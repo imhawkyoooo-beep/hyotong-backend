@@ -82,7 +82,7 @@ tr.editing td{background:#eff6ff}
 <body>
 <header>
   <div><h1>효신통합관리</h1><small>대표이사 경영관리 시스템</small></div>
-  <div style="display:flex;align-items:center;gap:12px"><div id="today"></div><button class="btn sm" onclick="logout()" style="background:#374151;color:white;border:0">로그아웃</button></div>
+  <div style="display:flex;align-items:center;gap:12px"><div id="today"></div><a id="adminLink" class="btn sm" href="/admin.html" style="display:none;background:#1d4ed8;color:white;text-decoration:none">관리자</a><button class="btn sm" onclick="logout()" style="background:#374151;color:white;border:0">로그아웃</button></div>
 </header>
 <nav id="nav"></nav>
 <main id="main">
@@ -593,6 +593,7 @@ async function restoreBackup(file){
   catch(e){setStatus('복원 실패: '+e.message,true);}finally{backupPicker.value='';}
 }
 async function logout(){try{await fetch('/api/logout',{method:'POST'});}finally{location.replace('/login.html');}}
+fetch('/api/me').then(r=>r.ok?r.json():null).then(d=>{if(d&&d.role==='admin')document.getElementById('adminLink').style.display='inline-block';}).catch(()=>{});
 
 /* ================= 끌어놓기: 화면 어디에 놓아도 자동 분류 ================= */
 let dragDepth=0;

@@ -10,6 +10,8 @@ const DATA_ROOT = process.env.DATA_DIR || ROOT;
 fs.mkdirSync(DATA_ROOT, {recursive:true});
 const DB_FILE = path.join(DATA_ROOT, 'data.json');
 const AUTH_FILE = path.join(DATA_ROOT, 'auth.json');
+const USERS_FILE = path.join(DATA_ROOT, 'users.json');
+const AUDIT_FILE = path.join(DATA_ROOT, 'audit.json');
 const UPLOAD_DIR = path.join(DATA_ROOT, 'uploads');
 const BACKUP_DIR = path.join(DATA_ROOT, 'backups');
 const PORT = Number(process.env.PORT || 10000);
@@ -63,6 +65,45 @@ function checkPassword(u, p) {
   return u === (authConfig.user || USER) && got.length === want.length && crypto.timingSafeEqual(got, want);
 }
 
+
+/* ---------- 직원 계정: users.json은 Render 영구 디스크(DATA_ROOT)에 별도 보관 ---------- */
+function readJsonFile(file, fallback) {
+  try { const v=JSON.parse(fs.readFileSync(file,'utf8')); return v; } catch { return fallback; }
+}
+function writeJsonAtomic(file, value) {
+  const tmp=file+'.tmp'; fs.writeFileSync(tmp,JSON.stringify(value,null,2),'utf8'); fs.renameSync(tmp,file);
+}
+let staffUsers = readJsonFile(USERS_FILE, []);
+if (!Array.isArray(staffUsers)) staffUsers=[];
+let auditLog = readJsonFile(AUDIT_FILE, []);
+if (!Array.isArray(auditLog)) auditLog=[];
+function saveUsers(){ writeJsonAtomic(USERS_FILE,staffUsers); }
+function addAudit(actor,action,target,detail='') {
+  auditLog.unshift({at:new Date().toISOString(),actor,action,target,detail});
+  auditLog=auditLog.slice(0,1000); writeJsonAtomic(AUDIT_FILE,auditLog);
+}
+function adminUsername(){ return (ENV_PASS.length>=12 ? USER : ((authConfig&&authConfig.user)||USER)); }
+function isAdminName(username){ return String(username||'')===adminUsername(); }
+function publicUser(u){ return {username:u.username,status:u.status,role:'staff',createdAt:u.createdAt,approvedAt:u.approvedAt||null,suspendedAt:u.suspendedAt||null}; }
+function findStaff(username){ return staffUsers.find(u=>u.username.toLowerCase()===String(username||'').toLowerCase()); }
+function passwordMatches(record,password){
+  if(!record||!record.salt||!record.hash) return false;
+  const got=Buffer.from(hashPassword(password,record.salt),'hex'), want=Buffer.from(record.hash,'hex');
+  return got.length===want.length && crypto.timingSafeEqual(got,want);
+}
+function getSessionInfo(req){
+  const token=(req.headers.cookie||'').match(/(?:^|; )hs_session=([A-Za-z0-9_-]+)/)?.[1];
+  if(!token) return null;
+  const session=sessions.get(token);
+  if(!session||session.expires<Date.now()){sessions.delete(token);return null;}
+  session.expires=Date.now()+8*60*60*1000;
+  return {token,username:session.username,role:session.role};
+}
+function requireAdmin(req,res){ const s=getSessionInfo(req); if(!s){sendJson(res,401,{ok:false,error:'login_required'});return null;} if(s.role!=='admin'){sendJson(res,403,{ok:false,error:'관리자 권한이 필요합니다.'});return null;} return s; }
+function validUsername(v){ return /^[a-zA-Z0-9][a-zA-Z0-9._-]{2,19}$/.test(String(v||'')); }
+function validPassword(v){ return typeof v==='string' && v.length>=12 && v.length<=128; }
+function staffCount(){ return staffUsers.filter(u=>u.status==='pending'||u.status==='approved'||u.status==='suspended').length; }
+
 const sessions = new Map();
 const loginAttempts = new Map();
 let lastSafetySnapshotAt = 0;
@@ -87,8 +128,8 @@ function originAllowed(req) {
   }
 }
 function requireSameOrigin(req,res) { if (!originAllowed(req)) { sendJson(res,403,{ok:false,error:'요청 출처가 올바르지 않습니다.'}); return false; } return true; }
-function getSession(req) { const m=(req.headers.cookie||'').match(/(?:^|; )hs_session=([A-Za-z0-9_-]+)/); if(!m) return null; const s=sessions.get(m[1]); if(!s || s.expires<Date.now()){sessions.delete(m[1]);return null;} s.expires=Date.now()+8*60*60*1000; return m[1]; }
-function requireAuth(req,res) { if(getSession(req)) return true; sendJson(res,401,{ok:false,error:'login_required'}); return false; }
+function getSession(req) { const s=getSessionInfo(req); return s ? s.token : null; }
+function requireAuth(req,res) { if(getSessionInfo(req)) return true; sendJson(res,401,{ok:false,error:'login_required'}); return false; }
 function readDb(){try { const d=JSON.parse(fs.readFileSync(DB_FILE,'utf8')); if(!d || typeof d!=='object' || Array.isArray(d)) throw new Error('invalid database'); for(const k of REQUIRED_DB_KEYS) if(!Array.isArray(d[k])) d[k]=[]; return d; } catch(err) { if(fs.existsSync(DB_FILE)) console.error('데이터 파일을 읽지 못했습니다. 빈 데이터로 덮어쓰지 않도록 저장 요청을 확인하세요:',err.message); return {...DEFAULT_DB}; }}
 function validDb(d){return !!d && typeof d==='object' && !Array.isArray(d) && REQUIRED_DB_KEYS.every(k=>Array.isArray(d[k]));}
 function readBody(req,limit,cb){
@@ -154,21 +195,83 @@ function handleUpload(req,res,url){
 
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
+  if(url.pathname==='/api/signup' && req.method==='POST'){
+    if(!requireSameOrigin(req,res)) return;
+    return readBody(req,10000,body=>{
+      let d={}; try{d=JSON.parse(body||'{}')}catch{}
+      const username=String(d.username||'').trim(); const password=String(d.password||'');
+      if(!validUsername(username)) return sendJson(res,400,{ok:false,error:'아이디는 영문·숫자·._- 조합 3~20자로 입력하세요.'});
+      if(!validPassword(password)) return sendJson(res,400,{ok:false,error:'비밀번호는 12~128자로 입력하세요.'});
+      if(isAdminName(username)||findStaff(username)) return sendJson(res,409,{ok:false,error:'이미 사용 중인 아이디입니다.'});
+      if(staffCount()>=10) return sendJson(res,403,{ok:false,error:'직원 계정은 대표자 외 최대 10명까지 신청할 수 있습니다.'});
+      const salt=crypto.randomBytes(16).toString('hex');
+      const user={username,salt,hash:hashPassword(password,salt),status:'pending',role:'staff',createdAt:new Date().toISOString()};
+      staffUsers.push(user); saveUsers(); addAudit('system','signup_pending',username,'직원 가입 신청');
+      return sendJson(res,201,{ok:true,message:'가입 신청이 접수되었습니다. 대표자 승인 후 로그인할 수 있습니다.'});
+    });
+  }
   if(url.pathname==='/api/login' && req.method==='POST'){
     if(!requireSameOrigin(req,res)) return;
     return readBody(req,10000,body=>{
       let d={}; try{d=JSON.parse(body||'{}')}catch{}
+      const username=String(d.username||'').trim(), password=String(d.password||'');
       const ip=req.socket.remoteAddress||'unknown'; const a=loginAttempts.get(ip)||{count:0,until:0};
       if(a.until>Date.now()) return sendJson(res,429,{ok:false,error:'잠시 후 다시 시도하세요.'});
-      if(!checkPassword(String(d.username||''),String(d.password||''))){a.count++; if(a.count>=5){a.count=0;a.until=Date.now()+30000;} loginAttempts.set(ip,a); return sendJson(res,401,{ok:false,error:'아이디 또는 비밀번호를 확인하세요.'});}
-      loginAttempts.delete(ip); const token=crypto.randomBytes(32).toString('base64url'); sessions.set(token,{expires:Date.now()+8*60*60*1000});
-      const secure = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim() === 'https';
-      return sendJson(res,200,{ok:true},{'Set-Cookie':`hs_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800${secure?'; Secure':''}`});
+      let role=null, valid=false;
+      if(isAdminName(username)){ valid=checkPassword(username,password); if(valid) role='admin'; }
+      else {
+        const u=findStaff(username);
+        if(u && u.status==='approved' && passwordMatches(u,password)){valid=true;role='staff';}
+        else if(u && u.status==='pending' && passwordMatches(u,password)) return sendJson(res,403,{ok:false,error:'가입 신청 승인 대기 중입니다. 대표자 승인 후 로그인할 수 있습니다.'});
+        else if(u && u.status==='suspended' && passwordMatches(u,password)) return sendJson(res,403,{ok:false,error:'계정이 정지되었습니다. 대표자에게 문의하세요.'});
+      }
+      if(!valid){a.count++;if(a.count>=5){a.count=0;a.until=Date.now()+30000;}loginAttempts.set(ip,a);return sendJson(res,401,{ok:false,error:'아이디 또는 비밀번호를 확인하세요.'});}
+      loginAttempts.delete(ip); const token=crypto.randomBytes(32).toString('base64url'); sessions.set(token,{username,role,expires:Date.now()+8*60*60*1000});
+      const secure=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';
+      return sendJson(res,200,{ok:true,role},{'Set-Cookie':`hs_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800${secure?'; Secure':''}`});
+    });
+  }
+  if(url.pathname==='/api/me' && req.method==='GET'){
+    const s=getSessionInfo(req); if(!s)return sendJson(res,401,{ok:false,error:'login_required'});
+    return sendJson(res,200,{ok:true,username:s.username,role:s.role});
+  }
+  if(url.pathname==='/api/admin/users' && req.method==='GET'){
+    const admin=requireAdmin(req,res); if(!admin)return;
+    return sendJson(res,200,{ok:true,users:staffUsers.map(publicUser),limit:10,used:staffCount()});
+  }
+  if(url.pathname==='/api/admin/audit' && req.method==='GET'){
+    const admin=requireAdmin(req,res); if(!admin)return;
+    return sendJson(res,200,{ok:true,logs:auditLog.slice(0,200)});
+  }
+  if(url.pathname.startsWith('/api/admin/') && req.method==='POST'){
+    const admin=requireAdmin(req,res); if(!admin)return;
+    if(!requireSameOrigin(req,res))return;
+    return readBody(req,10000,body=>{
+      let d={};try{d=JSON.parse(body||'{}')}catch{}
+      const target=String(d.username||''); const u=findStaff(target);
+      if(!u)return sendJson(res,404,{ok:false,error:'직원 계정을 찾을 수 없습니다.'});
+      const action=url.pathname.slice('/api/admin/'.length);
+      if(action==='approve'){
+        if(u.status!=='pending')return sendJson(res,400,{ok:false,error:'승인 대기 중인 계정이 아닙니다.'});
+        u.status='approved';u.approvedAt=new Date().toISOString();
+      } else if(action==='reject'||action==='delete'){
+        staffUsers=staffUsers.filter(x=>x!==u); saveUsers(); addAudit(admin.username,action,target,'직원 계정 삭제/가입 거절');
+        return sendJson(res,200,{ok:true});
+      } else if(action==='suspend'){
+        if(u.status!=='approved')return sendJson(res,400,{ok:false,error:'승인된 계정만 정지할 수 있습니다.'});
+        u.status='suspended';u.suspendedAt=new Date().toISOString();
+        for(const [token,session] of sessions)if(session.username===u.username)sessions.delete(token);
+      } else if(action==='restore'){
+        if(u.status!=='suspended')return sendJson(res,400,{ok:false,error:'정지된 계정이 아닙니다.'});
+        u.status='approved';delete u.suspendedAt;
+      } else return sendJson(res,404,{ok:false,error:'지원하지 않는 관리자 작업입니다.'});
+      saveUsers();addAudit(admin.username,action,target);return sendJson(res,200,{ok:true});
     });
   }
   if(url.pathname==='/api/logout' && req.method==='POST'){
     if(!requireSameOrigin(req,res)) return;const t=getSession(req);if(t)sessions.delete(t);const secure=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';return sendJson(res,200,{ok:true},{'Set-Cookie':`hs_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secure?'; Secure':''}`});}
   if(url.pathname==='/login.html' && (req.method==='GET'||req.method==='HEAD')) { res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}); return fs.createReadStream(path.join(ROOT,'login.html')).pipe(res); }
+  if(url.pathname==='/signup.html' && (req.method==='GET'||req.method==='HEAD')) { res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}); return fs.createReadStream(path.join(ROOT,'signup.html')).pipe(res); }
   if(url.pathname==='/api/health' && req.method==='GET') return sendJson(res,200,{ok:true,app:'효신통합관리'});
   if(url.pathname.startsWith('/api/')){
     if(!requireAuth(req,res)) return;
@@ -236,7 +339,9 @@ const server=http.createServer((req,res)=>{
     }
     return send(res,404,'Not Found');
   }
-  if(!getSession(req)){ if(req.method==='GET'||req.method==='HEAD') {res.writeHead(302,{Location:'/login.html','Cache-Control':'no-store'});return res.end();} return send(res,401,'로그인이 필요합니다.'); }
+  const currentSession=getSessionInfo(req);
+  if(!currentSession){ if(req.method==='GET'||req.method==='HEAD') {res.writeHead(302,{Location:'/login.html','Cache-Control':'no-store'});return res.end();} return send(res,401,'로그인이 필요합니다.'); }
+  if(url.pathname==='/admin.html' && currentSession.role!=='admin') return send(res,403,'관리자 권한이 필요합니다.');
   if(req.method!=='GET'&&req.method!=='HEAD') return send(res,405,'Method Not Allowed');
   // 화면 파일만 제공 (데이터·비밀번호·백업·첨부 폴더는 직접 접근 불가)
   const requested=url.pathname==='/'?'index.html':decodeParam(url.pathname.slice(1));
