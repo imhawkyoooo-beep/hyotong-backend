@@ -20,6 +20,11 @@ const DEFAULT_DB = {projects:[],assets:[],finance:[],tax:[],employees:[],sales:[
 fs.mkdirSync(UPLOAD_DIR, {recursive:true});
 fs.mkdirSync(BACKUP_DIR, {recursive:true});
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
+const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs'];
+const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','기타문서':'docs'};
+function permissionsFor(session){ if(session.role==='admin') return [...PERMISSION_KEYS]; const u=findStaff(session.username); return u&&Array.isArray(u.permissions)?u.permissions.filter(k=>PERMISSION_KEYS.includes(k)):[]; }
+function canCategory(session,cat){ return session.role==='admin' || permissionsFor(session).includes(CATEGORY_PERMISSION[cat]||'docs'); }
+function visibleDb(session){ const d=readDb(); if(session.role==='admin') return d; const allowed=permissionsFor(session); const out={...DEFAULT_DB}; for(const k of REQUIRED_DB_KEYS){ if(allowed.includes(k)) out[k]=d[k]; } out.files=(d.files||[]).filter(f=>canCategory(session,f.category)); return out; }
 // 파일 자동분류 카테고리 = uploads 아래 폴더 이름
 const CATEGORIES = ['사업관리','부동산자산','재무자금','세무회계','인사','영업분양','기타문서'];
 const MAX_UPLOAD = 100 * 1024 * 1024;
@@ -84,7 +89,7 @@ function addAudit(actor,action,target,detail='') {
 }
 function adminUsername(){ return (ENV_PASS.length>=12 ? USER : ((authConfig&&authConfig.user)||USER)); }
 function isAdminName(username){ return String(username||'')===adminUsername(); }
-function publicUser(u){ return {username:u.username,status:u.status,role:'staff',createdAt:u.createdAt,approvedAt:u.approvedAt||null,suspendedAt:u.suspendedAt||null}; }
+function publicUser(u){ return {username:u.username,status:u.status,role:'staff',permissions:Array.isArray(u.permissions)?u.permissions:[],createdAt:u.createdAt,approvedAt:u.approvedAt||null,suspendedAt:u.suspendedAt||null}; }
 function findStaff(username){ return staffUsers.find(u=>u.username.toLowerCase()===String(username||'').toLowerCase()); }
 function passwordMatches(record,password){
   if(!record||!record.salt||!record.hash) return false;
@@ -180,6 +185,7 @@ function handleUpload(req,res,url){
   const name=safeName(decodeParam(url.searchParams.get('name')));
   const reqCat=decodeParam(url.searchParams.get('category'));
   const cat=CATEGORIES.includes(reqCat)?reqCat:'기타문서';
+  const session=getSessionInfo(req); if(!session||!canCategory(session,cat)) return sendJson(res,403,{ok:false,error:'이 문서 분류에 대한 접근 권한이 없습니다.'});
   const dir=path.join(UPLOAD_DIR,cat);
   fs.mkdirSync(dir,{recursive:true});
   const stored=Date.now()+'_'+crypto.randomBytes(4).toString('hex')+'_'+name;
@@ -205,7 +211,7 @@ const server=http.createServer((req,res)=>{
       if(isAdminName(username)||findStaff(username)) return sendJson(res,409,{ok:false,error:'이미 사용 중인 아이디입니다.'});
       if(staffCount()>=10) return sendJson(res,403,{ok:false,error:'직원 계정은 대표자 외 최대 10명까지 신청할 수 있습니다.'});
       const salt=crypto.randomBytes(16).toString('hex');
-      const user={username,salt,hash:hashPassword(password,salt),status:'pending',role:'staff',createdAt:new Date().toISOString()};
+      const user={username,salt,hash:hashPassword(password,salt),status:'pending',role:'staff',permissions:[],createdAt:new Date().toISOString()};
       staffUsers.push(user); saveUsers(); addAudit('system','signup_pending',username,'직원 가입 신청');
       return sendJson(res,201,{ok:true,message:'가입 신청이 접수되었습니다. 대표자 승인 후 로그인할 수 있습니다.'});
     });
@@ -233,7 +239,7 @@ const server=http.createServer((req,res)=>{
   }
   if(url.pathname==='/api/me' && req.method==='GET'){
     const s=getSessionInfo(req); if(!s)return sendJson(res,401,{ok:false,error:'login_required'});
-    return sendJson(res,200,{ok:true,username:s.username,role:s.role});
+    return sendJson(res,200,{ok:true,username:s.username,role:s.role,permissions:permissionsFor(s)});
   }
   if(url.pathname==='/api/admin/users' && req.method==='GET'){
     const admin=requireAdmin(req,res); if(!admin)return;
@@ -242,6 +248,20 @@ const server=http.createServer((req,res)=>{
   if(url.pathname==='/api/admin/audit' && req.method==='GET'){
     const admin=requireAdmin(req,res); if(!admin)return;
     return sendJson(res,200,{ok:true,logs:auditLog.slice(0,200)});
+  }
+  if(url.pathname==='/api/admin/permissions' && req.method==='POST'){
+    const admin=requireAdmin(req,res); if(!admin)return;
+    if(!requireSameOrigin(req,res))return;
+    return readBody(req,10000,body=>{
+      let d={};try{d=JSON.parse(body||'{}')}catch{}
+      const target=String(d.username||''); const u=findStaff(target);
+      if(!u)return sendJson(res,404,{ok:false,error:'직원 계정을 찾을 수 없습니다.'});
+      if(u.status!=='approved')return sendJson(res,400,{ok:false,error:'승인된 직원에게만 권한을 부여할 수 있습니다.'});
+      if(!Array.isArray(d.permissions))return sendJson(res,400,{ok:false,error:'권한 목록 형식이 올바르지 않습니다.'});
+      const next=[...new Set(d.permissions.filter(k=>PERMISSION_KEYS.includes(k)))];
+      u.permissions=next; saveUsers(); addAudit(admin.username,'permissions',target,next.join(','));
+      return sendJson(res,200,{ok:true,permissions:next});
+    });
   }
   if(url.pathname.startsWith('/api/admin/') && req.method==='POST'){
     const admin=requireAdmin(req,res); if(!admin)return;
@@ -275,21 +295,30 @@ const server=http.createServer((req,res)=>{
   if(url.pathname==='/api/health' && req.method==='GET') return sendJson(res,200,{ok:true,app:'효신통합관리'});
   if(url.pathname.startsWith('/api/')){
     if(!requireAuth(req,res)) return;
-    if(url.pathname==='/api/db'&&req.method==='GET') return sendJson(res,200,readDb());
+    if(url.pathname==='/api/db'&&req.method==='GET') { const session=getSessionInfo(req); return sendJson(res,200,visibleDb(session)); }
     if(url.pathname==='/api/db'&&req.method==='POST'){
       if(!requireSameOrigin(req,res)) return;
       return readBody(req,20_000_000,(body,tooLarge)=>{
         if(tooLarge) return sendJson(res,413,{ok:false,error:'too_large'});
         let d; try{d=JSON.parse(body)}catch{return sendJson(res,400,{ok:false,error:'invalid_json'});}
         if(!validDb(d)) return sendJson(res,400,{ok:false,error:'데이터 형식이 올바르지 않아 저장을 중단했습니다. 기존 자료는 유지됩니다.'});
-        makeSafetySnapshot(); writeDb(d); sendJson(res,200,{ok:true});
+        const session=getSessionInfo(req);
+        if(session.role==='admin'){ makeSafetySnapshot(); writeDb(d); return sendJson(res,200,{ok:true}); }
+        const allowed=permissionsFor(session); const current=readDb();
+        for(const k of REQUIRED_DB_KEYS){ if(k==='files') continue; if(allowed.includes(k)||(k==='cashflow'&&allowed.includes('finance'))) current[k]=d[k]; }
+        const allowedFiles=(d.files||[]).filter(f=>f&&canCategory(session,f.category));
+        const existingFiles=current.files||[];
+        current.files=[...existingFiles.filter(f=>!canCategory(session,f.category)),...allowedFiles];
+        makeSafetySnapshot(); writeDb(current); sendJson(res,200,{ok:true});
       });
     }
     if(url.pathname==='/api/backup'&&req.method==='GET') {
+      if(getSessionInfo(req).role!=='admin') return sendJson(res,403,{ok:false,error:'대표자만 백업할 수 있습니다.'});
       const payload=JSON.stringify({exportedAt:new Date().toISOString(),database:readDb()},null,2);
       return send(res,200,payload,JSON_TYPE,{'Content-Disposition':`attachment; filename*=UTF-8''hyoshin-backup-${new Date().toISOString().slice(0,10)}.json`});
     }
     if(url.pathname==='/api/restore'&&req.method==='POST'){
+      if(getSessionInfo(req).role!=='admin') return sendJson(res,403,{ok:false,error:'대표자만 백업을 복원할 수 있습니다.'});
       if(!requireSameOrigin(req,res)) return;
       return readBody(req,20_000_000,(body,tooLarge)=>{
         if(tooLarge) return sendJson(res,413,{ok:false,error:'백업 파일은 20MB 이하만 복원할 수 있습니다.'});
@@ -308,7 +337,9 @@ const server=http.createServer((req,res)=>{
       return handleUpload(req,res,url);
     }
     if(url.pathname==='/api/file'&&req.method==='GET'){
-      const f=resolveUpload(url.searchParams.get('path'));
+      const rel=String(url.searchParams.get('path')||''); const cat=rel.split('/')[0];
+      if(!canCategory(getSessionInfo(req),cat)) return sendJson(res,403,{ok:false,error:'이 문서 분류에 대한 접근 권한이 없습니다.'});
+      const f=resolveUpload(rel);
       if(!f||!fs.existsSync(f)||!fs.statSync(f).isFile()) return send(res,404,'Not Found');
       const ext=path.extname(f).toLowerCase();
       const original=path.basename(f).replace(/^\d+_[0-9a-f]{8}_/,'');
@@ -320,7 +351,8 @@ const server=http.createServer((req,res)=>{
       if(!requireSameOrigin(req,res)) return;
       return readBody(req,10000,body=>{
         let d={}; try{d=JSON.parse(body||'{}')}catch{}
-        const from=resolveUpload(d.path);
+        const from=resolveUpload(d.path); const session=getSessionInfo(req); const sourceCat=String(d.path||'').split('/')[0];
+        if(!canCategory(session,sourceCat)||!canCategory(session,d.category)) return sendJson(res,403,{ok:false,error:'파일 이동 권한이 없습니다.'});
         if(!from||!CATEGORIES.includes(d.category)||!fs.existsSync(from)) return sendJson(res,400,{ok:false,error:'파일을 찾을 수 없습니다.'});
         const dir=path.join(UPLOAD_DIR,d.category); fs.mkdirSync(dir,{recursive:true});
         const base=path.basename(from);
@@ -332,6 +364,8 @@ const server=http.createServer((req,res)=>{
       if(!requireSameOrigin(req,res)) return;
       return readBody(req,10000,body=>{
         let d={}; try{d=JSON.parse(body||'{}')}catch{}
+        const session=getSessionInfo(req); const cat=String(d.path||'').split('/')[0];
+        if(!canCategory(session,cat)) return sendJson(res,403,{ok:false,error:'파일 삭제 권한이 없습니다.'});
         const f=resolveUpload(d.path);
         if(!f) return sendJson(res,400,{ok:false,error:'잘못된 요청입니다.'});
         fs.rm(f,{force:true},()=>sendJson(res,200,{ok:true}));
