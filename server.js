@@ -19,6 +19,9 @@ const USER = process.env.HS_USER || 'admin';
 const DEFAULT_DB = {projects:[],assets:[],finance:[],tax:[],employees:[],sales:[],cashflow:[],files:[]};
 fs.mkdirSync(UPLOAD_DIR, {recursive:true});
 fs.mkdirSync(BACKUP_DIR, {recursive:true});
+// [PDF 본문 검색] 색인은 DATA_ROOT/search-index 에만 저장 (uploads·data.json 은 읽기만 함)
+// 서버는 새로 업로드된 PDF만 자동 색인. 기존 PDF는 관리자가 Render Shell 에서 `node reindex.js` 로 직접 배치 실행
+const pdfIndex = require('./pdf-index').create({uploadDir:UPLOAD_DIR, indexDir:path.join(DATA_ROOT,'search-index')});
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
 const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs'];
 const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','기타문서':'docs'};
@@ -195,7 +198,7 @@ function handleUpload(req,res,url){
   req.on('data',c=>{ size+=c.length; if(size>MAX_UPLOAD){ fail(413,'파일은 100MB 이하만 업로드할 수 있습니다.'); req.unpipe(stream); req.resume(); } });
   req.on('aborted',()=>fail(400,'업로드가 중단되었습니다.'));
   stream.on('error',()=>fail(500,'파일 저장에 실패했습니다.'));
-  stream.on('finish',()=>{ if(!failed) sendJson(res,201,{ok:true,path:cat+'/'+stored,size}); });
+  stream.on('finish',()=>{ if(!failed){ sendJson(res,201,{ok:true,path:cat+'/'+stored,size}); pdfIndex.enqueue(cat+'/'+stored); } });
   req.pipe(stream);
 }
 
@@ -296,6 +299,16 @@ const server=http.createServer((req,res)=>{
   if(url.pathname.startsWith('/api/')){
     if(!requireAuth(req,res)) return;
     if(url.pathname==='/api/db'&&req.method==='GET') { const session=getSessionInfo(req); return sendJson(res,200,visibleDb(session)); }
+    // [PDF 본문 검색] 읽기 전용. visibleDb()가 권한 있는 분류의 파일만 돌려주므로 권한 밖 문서는 검색되지 않음
+    if(url.pathname==='/api/search'&&req.method==='GET') {
+      const q=String(url.searchParams.get('q')||'').trim().slice(0,100);
+      if(!q) return sendJson(res,200,{ok:true,results:[]});
+      return sendJson(res,200,{ok:true,...pdfIndex.search(q,visibleDb(getSessionInfo(req)).files)});
+    }
+    if(url.pathname==='/api/search/status'&&req.method==='GET') {
+      if(getSessionInfo(req).role!=='admin') return sendJson(res,403,{ok:false,error:'관리자 권한이 필요합니다.'});
+      return sendJson(res,200,{ok:true,...pdfIndex.status(readDb().files)});
+    }
     if(url.pathname==='/api/db'&&req.method==='POST'){
       if(!requireSameOrigin(req,res)) return;
       return readBody(req,20_000_000,(body,tooLarge)=>{
