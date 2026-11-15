@@ -22,6 +22,10 @@ fs.mkdirSync(BACKUP_DIR, {recursive:true});
 // [PDF 본문 검색] 색인은 DATA_ROOT/search-index 에만 저장 (uploads·data.json 은 읽기만 함)
 // 서버는 새로 업로드된 PDF만 자동 색인. 기존 PDF는 관리자가 Render Shell 에서 `node reindex.js` 로 직접 배치 실행
 const pdfIndex = require('./pdf-index').create({uploadDir:UPLOAD_DIR, indexDir:path.join(DATA_ROOT,'search-index')});
+// [업무보고·뉴스] 기존 data.json 과 분리된 별도 폴더에 저장 (DATA_ROOT/work-reports, DATA_ROOT/news)
+const REPORTS_DIR = path.join(DATA_ROOT, 'work-reports');
+const NEWS_DIR = path.join(DATA_ROOT, 'news');
+const { unifiedSearch } = require('./unified-search');
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
 const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs'];
 const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','기타문서':'docs'};
@@ -173,7 +177,9 @@ function makeAutomaticBackup(reason='scheduled') {
     fs.mkdirSync(dir,{recursive:false});
     if(fs.existsSync(DB_FILE)) fs.copyFileSync(DB_FILE,path.join(dir,'data.json'));
     if(fs.existsSync(UPLOAD_DIR)) fs.cpSync(UPLOAD_DIR,path.join(dir,'uploads'),{recursive:true,errorOnExist:false});
-    fs.writeFileSync(path.join(dir,'BACKUP_INFO.txt'),`효신통합관리 자동 백업\n생성시각: ${new Date().toISOString()}\n유형: ${reason}\n포함: data.json 및 uploads 폴더(존재하는 경우)\n이 폴더를 삭제하거나 수정하기 전에 별도 복사본을 보관하세요.\n`,'utf8');
+    // [업무보고] 보고서와 첨부도 같은 시점으로 함께 백업 (임시 파일 제외)
+    if(fs.existsSync(REPORTS_DIR)) fs.cpSync(REPORTS_DIR,path.join(dir,'work-reports'),{recursive:true,errorOnExist:false,filter:s=>!s.endsWith('.tmp')});
+    fs.writeFileSync(path.join(dir,'BACKUP_INFO.txt'),`효신통합관리 자동 백업\n생성시각: ${new Date().toISOString()}\n유형: ${reason}\n포함: data.json, uploads 폴더, work-reports 폴더(업무보고, 존재하는 경우)\n이 폴더를 삭제하거나 수정하기 전에 별도 복사본을 보관하세요.\n`,'utf8');
     const backups=fs.readdirSync(BACKUP_DIR,{withFileTypes:true})
       .filter(e=>e.isDirectory()&&e.name.startsWith('auto-'))
       .map(e=>({name:e.name,time:fs.statSync(path.join(BACKUP_DIR,e.name)).mtimeMs}))
@@ -202,6 +208,9 @@ function handleUpload(req,res,url){
   req.pipe(stream);
 }
 
+// [업무보고] 권한 검사는 모듈 안에서 세션 기준으로 수행 / [뉴스] 하루 한 번 자동 수집
+const workReports = require('./work-reports').create({dataRoot:DATA_ROOT, ctx:{getSessionInfo, visibleDb, sendJson, readBody, requireSameOrigin, decodeParam, addAudit, adminUsername, staffUsers:()=>staffUsers}});
+const news = require('./news').create({dataRoot:DATA_ROOT});
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
   if(url.pathname==='/api/signup' && req.method==='POST'){
@@ -309,6 +318,19 @@ const server=http.createServer((req,res)=>{
       if(getSessionInfo(req).role!=='admin') return sendJson(res,403,{ok:false,error:'관리자 권한이 필요합니다.'});
       return sendJson(res,200,{ok:true,...pdfIndex.status(readDb().files)});
     }
+    // [통합검색] 회사 자료·파일·폴더·PDF 본문·업무보고를 권한 범위 안에서 한 번에 검색 (읽기 전용)
+    if(url.pathname==='/api/unified-search'&&req.method==='GET') {
+      return sendJson(res,200,{ok:true,...unifiedSearch({q:url.searchParams.get('q'),session:getSessionInfo(req),visibleDb,pdfIndex,reports:workReports})});
+    }
+    // [뉴스] 조회는 로그인 사용자, 수동 갱신은 대표만
+    if(url.pathname==='/api/news'&&req.method==='GET') return sendJson(res,200,{ok:true,...news.view(getSessionInfo(req).role==='admin')});
+    if(url.pathname==='/api/news/refresh'&&req.method==='POST') {
+      if(getSessionInfo(req).role!=='admin') return sendJson(res,403,{ok:false,error:'대표자만 갱신할 수 있습니다.'});
+      if(!requireSameOrigin(req,res)) return;
+      return news.refresh({force:true}).then(()=>sendJson(res,200,{ok:true,...news.view(true)})).catch(e=>sendJson(res,500,{ok:false,error:e.message}));
+    }
+    // [업무보고] 현장별·직원별·주간·승인·통계
+    if(url.pathname==='/api/reports'||url.pathname.startsWith('/api/reports/')) return workReports.handle(req,res,url);
     if(url.pathname==='/api/db'&&req.method==='POST'){
       if(!requireSameOrigin(req,res)) return;
       return readBody(req,20_000_000,(body,tooLarge)=>{
@@ -393,7 +415,7 @@ const server=http.createServer((req,res)=>{
   // 화면 파일만 제공 (데이터·비밀번호·백업·첨부 폴더는 직접 접근 불가)
   const requested=url.pathname==='/'?'index.html':decodeParam(url.pathname.slice(1));
   const file=path.resolve(ROOT,requested);
-  const blocked=[DB_FILE,AUTH_FILE].includes(file)||[UPLOAD_DIR,BACKUP_DIR].some(d=>file.startsWith(d+path.sep))||/\.(js|ps1|bat|json|tmp)$/i.test(file);
+  const blocked=[DB_FILE,AUTH_FILE].includes(file)||[UPLOAD_DIR,BACKUP_DIR,REPORTS_DIR,NEWS_DIR].some(d=>file.startsWith(d+path.sep))||/\.(js|ps1|bat|json|tmp)$/i.test(file);
   if(!file.startsWith(ROOT+path.sep)||blocked||!fs.existsSync(file)||!fs.statSync(file).isFile())return send(res,404,'Not Found');
   const ext=path.extname(file).toLowerCase();const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon'};
   res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','Cache-Control':'no-store'});if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);
@@ -403,7 +425,7 @@ server.on('error',err=>{
   else console.error('[오류] 서버 시작 실패:',err.message);
   process.exit(1);
 });
-server.listen(PORT,'0.0.0.0',()=>{console.log('효신통합관리 서버 실행: http://localhost:'+PORT);console.log('로그인 아이디: '+((authConfig&&authConfig.user)||USER));console.log('서버를 종료하려면 이 창에서 Ctrl+C를 누르세요.');});
+server.listen(PORT,'0.0.0.0',()=>{console.log('효신통합관리 서버 실행: http://localhost:'+PORT);console.log('로그인 아이디: '+((authConfig&&authConfig.user)||USER));console.log('서버를 종료하려면 이 창에서 Ctrl+C를 누르세요.');news.start();});
 
 // 서버가 켜져 있는 동안 6시간마다 자동 백업. 기존 자료가 없으면 빈 백업은 만들지 않습니다.
 const backupTimer=setInterval(()=>makeAutomaticBackup('scheduled'),6*60*60*1000);
