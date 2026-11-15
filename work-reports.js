@@ -29,11 +29,13 @@ const FIELDS = {
   site: {
     siteId: str(80), siteName: str(100, true), date: { kind: 'date', req: true }, assignee: str(40),
     content: str(5000, true), consult: str(3000), consultCount: num(0, 1e6), contractCount: num(0, 1e6),
-    progress: num(0, 100), issues: str(3000), urgent: { kind: 'bool' },
+    progress: num(0, 100), issues: str(3000), nextPlan: str(3000), urgent: { kind: 'bool' },
   },
   staff: {
-    date: { kind: 'date', req: true }, sites: { kind: 'list', max: 10, item: 100 }, projects: { kind: 'list', max: 10, item: 100 },
-    content: str(5000, true), progress: num(0, 100), results: str(3000), plan: str(3000), urgent: { kind: 'bool' },
+    date: { kind: 'date', req: true }, staffName: str(40), dept: str(60), duty: str(500),
+    sites: { kind: 'list', max: 10, item: 100 }, projects: { kind: 'list', max: 10, item: 100 },
+    results: str(5000, true), inProgress: str(3000), issues: str(3000), plan: str(3000),
+    content: str(5000), progress: num(0, 100), urgent: { kind: 'bool' },
   },
   weekly: {
     weekStart: { kind: 'date', req: true }, target: num(0, 1e12), actual: num(0, 1e12), goalText: str(3000),
@@ -94,7 +96,7 @@ function create({ dataRoot, ctx }) {
 
   function summary(r) {
     const t = r.type;
-    const title = t === 'site' ? `${r.siteName} · ${r.date}` : t === 'staff' ? `${r.authorName || r.author} · ${r.date}` : `${r.authorName || r.author} · ${r.weekStart} 주간`;
+    const title = t === 'site' ? `${r.siteName} · ${r.date}` : t === 'staff' ? `${r.staffName || r.authorName || r.author}${r.dept ? ' (' + r.dept + ')' : ''} · ${r.date}` : `${r.staffName || r.authorName || r.author} · ${r.weekStart} 주간`;
     const achievement = t === 'weekly' && r.target > 0 ? Math.round((Number(r.actual || 0) / r.target) * 1000) / 10 : null;
     return { ...r, title, typeLabel: TYPE_LABEL[t], statusLabel: STATUS_LABEL[r.status] || r.status, achievement, attachments: (r.attachments || []).map(({ stored, ...a }) => a) };
   }
@@ -135,6 +137,7 @@ function create({ dataRoot, ctx }) {
     if (f('type')) rs = rs.filter((r) => r.type === f('type'));
     if (f('status')) rs = rs.filter((r) => r.status === f('status'));
     if (f('author')) rs = rs.filter((r) => r.author === f('author'));
+    if (f('staff')) { const v = f('staff').toLowerCase(); rs = rs.filter((r) => String(r.author).toLowerCase() === v || String(r.staffName || '').toLowerCase().includes(v)); }
     if (f('site')) rs = rs.filter((r) => r.siteName === f('site') || (r.sites || []).includes(f('site')));
     if (f('urgent') === '1') rs = rs.filter((r) => r.urgent);
     const day = (r) => r.date || r.weekStart || '';
@@ -145,14 +148,14 @@ function create({ dataRoot, ctx }) {
     const limit = Math.min(500, Math.max(1, Number(f('limit')) || 200));
     return { total: rs.length, reports: rs.slice(0, limit).map((r) => { const x = summary(r); delete x.history; return x; }) };
   }
-  const haystack = (r) => [r.siteName, r.assignee, r.author, r.content, r.consult, r.issues, r.results, r.plan, r.goalText, r.resultText, r.siteStatus, r.nextPlan, (r.sites || []).join(' '), (r.projects || []).join(' '), TYPE_LABEL[r.type], ...(r.comments || []).map((c) => c.text)].filter(Boolean).join(' ').toLowerCase();
+  const haystack = (r) => [r.siteName, r.assignee, r.author, r.staffName, r.dept, r.duty, r.inProgress, r.content, r.consult, r.issues, r.results, r.plan, r.goalText, r.resultText, r.siteStatus, r.nextPlan, (r.sites || []).join(' '), (r.projects || []).join(' '), TYPE_LABEL[r.type], ...(r.comments || []).map((c) => c.text)].filter(Boolean).join(' ').toLowerCase();
 
   // 통합검색용 (권한 검사 포함)
   function search(s, terms, limit = 15) {
     const out = [];
     for (const r of visible(s)) {
       const h = haystack(r); if (!terms.every((t) => h.includes(t) || h.replace(/\s+/g, '').includes(t.replace(/\s+/g, '')))) continue;
-      const body = [r.content, r.resultText, r.issues, r.plan].find(Boolean) || '';
+      const body = [r.content, r.results, r.resultText, r.inProgress, r.issues, r.plan, r.nextPlan].find((x) => x && x.toLowerCase().includes(terms[0])) || [r.content, r.results, r.resultText].find(Boolean) || '';
       const i = body.toLowerCase().indexOf(terms[0]);
       out.push({ id: r.id, type: r.type, typeLabel: TYPE_LABEL[r.type], title: summary(r).title, status: STATUS_LABEL[r.status], urgent: !!r.urgent, snippet: (i > 40 ? '…' : '') + body.slice(Math.max(0, i - 40), Math.max(0, i) + 80).replace(/\s+/g, ' ') });
       if (out.length >= limit) break;
@@ -179,19 +182,28 @@ function create({ dataRoot, ctx }) {
       b.consults += Number(r.consultCount || 0); b.contracts += Number(r.contractCount || 0);
       if (r.progress != null) { b.progressSum += Number(r.progress); b.progressN++; }
     }
-    const staff = Object.values(byStaff).map(({ progressSum, progressN, ...b }) => ({ ...b, avgProgress: progressN ? Math.round(progressSum / progressN) : null })).sort((a, b) => b.total - a.total);
+    const staffOf = () => Object.values(byStaff).map(({ progressSum, progressN, _sites, ...b }) => ({ ...b, avgProgress: progressN ? Math.round(progressSum / progressN) : null, siteNames: [...(_sites || [])] })).sort((a, b) => b.total - a.total);
     // 현장별 진행률: 해당 월 마지막 보고 기준
     const siteMap = {};
     for (const r of inMonth.filter((x) => x.type === 'site').sort((a, b) => String(a.date).localeCompare(b.date))) {
-      const x = (siteMap[r.siteName] ||= { site: r.siteName, reports: 0, progress: null, lastDate: '', consults: 0, contracts: 0, openIssues: 0 });
-      x.reports++; x.lastDate = r.date; if (r.progress != null) x.progress = r.progress;
+      const x = (siteMap[r.siteName] ||= { site: r.siteName, reports: 0, staffReports: 0, people: new Set(), progress: null, lastDate: '', consults: 0, contracts: 0, openIssues: 0 });
+      x.reports++; x.people.add(r.author); if (r.date > x.lastDate) x.lastDate = r.date; if (r.progress != null) x.progress = r.progress;
       x.consults += Number(r.consultCount || 0); x.contracts += Number(r.contractCount || 0); if (r.issues) x.openIssues++;
     }
+    // 같은 업무를 양쪽에 집계: 직원별 보고에서 선택한 현장은 그 현장의 "연결된 직원 보고"로도 집계
+    for (const r of inMonth.filter((x) => x.type === 'staff')) {
+      for (const name of r.sites || []) {
+        const x = (siteMap[name] ||= { site: name, reports: 0, staffReports: 0, people: new Set(), progress: null, lastDate: '', consults: 0, contracts: 0, openIssues: 0 });
+        x.staffReports++; x.people.add(r.author); if (r.date > x.lastDate) x.lastDate = r.date;
+      }
+      const b = byStaff[r.author]; if (b) for (const name of r.sites || []) (b._sites ||= new Set()).add(name);
+    }
+    for (const r of inMonth.filter((x) => x.type === 'site')) { const b = byStaff[r.author]; if (b) (b._sites ||= new Set()).add(r.siteName); }
     // 월별 보고 현황 (최근 6개월)
     const months = []; const [y, mo] = m.split('-').map(Number);
     for (let i = 5; i >= 0; i--) { const d = new Date(Date.UTC(y, mo - 1 - i, 1)); months.push(d.toISOString().slice(0, 7)); }
     const monthly = months.map((mm) => { const xs = rs.filter((r) => String(r.date || r.weekStart || '').startsWith(mm)); return { month: mm, total: xs.length, site: xs.filter((r) => r.type === 'site').length, staff: xs.filter((r) => r.type === 'staff').length, weekly: xs.filter((r) => r.type === 'weekly').length, approved: xs.filter((r) => r.status === 'approved').length, pending: xs.filter((r) => r.status === 'submitted').length }; });
-    return { month: m, scope: isAdmin(s) ? 'all' : 'mine', staff, sites: Object.values(siteMap), monthly, totals: { reports: inMonth.length, pending: inMonth.filter((r) => r.status === 'submitted').length, urgent: inMonth.filter((r) => r.urgent).length } };
+    return { month: m, scope: isAdmin(s) ? 'all' : 'mine', staff: staffOf(), sites: Object.values(siteMap).map(({ people, ...x }) => ({ ...x, people: people.size })).sort((a, b) => String(b.lastDate).localeCompare(a.lastDate)), monthly, totals: { reports: inMonth.length, pending: inMonth.filter((r) => r.status === 'submitted').length, urgent: inMonth.filter((r) => r.urgent).length } };
   }
 
   // ---------- 라우터 ----------

@@ -14,13 +14,15 @@
 const fs = require('fs');
 const path = require('path');
 
+// 분야(5): 주택·분양·전세 / 재개발·재건축·개발 / 부동산 세법 / 금융·대출·정책 / 미분양
 const CATEGORIES = {
-  '세법': ['취득세', '양도세', '양도소득세', '종부세', '종합부동산세', '보유세', '재산세', '임대사업자', '공시가격', '세제', '세율', '중과', '비과세'],
-  '정책·금융': ['국토교통부', '국토부', '대출', 'dsr', 'ltv', '금리', '주담대', '주택담보', '규제', '토지거래허가', '토허제', '정책', '금융위', '한국은행', '기준금리', '가계부채', '스트레스'],
-  '개발': ['재개발', '재건축', '도시개발', '정비사업', '정비구역', '분양', '청약', '인허가', '착공', '신도시', '공급', '리모델링', '모아타운', '택지', '시행사', 'pf'],
-  '주택시장': ['아파트', '매매', '전세', '월세', '미분양', '입주', '집값', '매매가', '거래량', '시세', '주택', '부동산', '빌라', '오피스텔', '전셋값', '호가'],
+  '미분양': ['미분양', '악성 미분양', '준공 후 미분양', '할인분양', '분양가 할인', '미계약', '잔여세대', '무순위', '줍줍', '공실'],
+  '부동산 세법': ['취득세', '양도세', '양도소득세', '종부세', '종합부동산세', '보유세', '재산세', '임대사업자', '공시가격', '세제', '세율', '중과', '비과세'],
+  '금융·대출·정책': ['국토교통부', '국토부', '대출', 'dsr', 'ltv', '금리', '주담대', '주택담보', '규제', '토지거래허가', '토허제', '정책', '금융위', '한국은행', '기준금리', '가계부채', '스트레스', 'pf'],
+  '재개발·재건축·개발': ['재개발', '재건축', '도시개발', '정비사업', '정비구역', '인허가', '착공', '신도시', '리모델링', '모아타운', '택지', '시행사', '조합'],
+  '주택·분양·전세': ['아파트', '매매', '전세', '월세', '입주', '집값', '매매가', '거래량', '시세', '주택', '부동산', '빌라', '오피스텔', '전셋값', '호가', '분양', '청약', '공급'],
 };
-const ORDER = ['주택시장', '개발', '세법', '정책·금융'];
+const ORDER = ['주택·분양·전세', '재개발·재건축·개발', '부동산 세법', '금융·대출·정책', '미분양'];
 // 부동산과 관련 없는 기사를 거르기 위한 필수 단어(하나 이상)
 const MUST = ['부동산', '아파트', '주택', '전세', '월세', '분양', '청약', '재개발', '재건축', '미분양', '입주', '집값', '취득세', '양도세', '양도소득세', '종부세', '종합부동산세', '보유세', '임대사업자', '국토부', '국토교통부', '주담대', '주택담보', '토지거래허가', '토허제', '정비사업', '도시개발', '전셋값', '공시가격', '빌라', '오피스텔', '신도시', 'ltv', 'dsr'];
 
@@ -32,10 +34,11 @@ const DEFAULT_FEEDS = [
   { name: '서울경제', url: 'https://www.sedaily.com/rss/realestate', weight: 2 },
 ];
 const GOOGLE_QUERIES = {
-  '주택시장': '아파트 매매 OR 전세 OR 미분양 OR 입주',
-  '개발': '재개발 OR 재건축 OR 도시개발 OR 분양 인허가',
-  '세법': '취득세 OR 양도소득세 OR 종합부동산세 OR 임대사업자 세금',
-  '정책·금융': '국토교통부 부동산 OR 주택담보대출 규제 OR 부동산 금리',
+  '주택·분양·전세': '아파트 매매 OR 전세 OR 분양 OR 입주',
+  '재개발·재건축·개발': '재개발 OR 재건축 OR 도시개발 OR 정비사업',
+  '부동산 세법': '취득세 OR 양도소득세 OR 종합부동산세 OR 임대사업자 세금',
+  '금융·대출·정책': '국토교통부 부동산 OR 주택담보대출 규제 OR 부동산 금리',
+  '미분양': '미분양 아파트 OR 오피스텔 미분양 OR 준공 후 미분양',
 };
 const UA = 'Mozilla/5.0 (compatible; HyoshinERP-NewsReader/1.0)';
 
@@ -61,7 +64,8 @@ function classify(title, summary) {
   // 제목에 부동산 핵심어가 있거나, 요약에 핵심어가 2개 이상 있어야 부동산 뉴스로 인정
   if (!MUST.some((w) => tl.includes(w)) && MUST.filter((w) => sl.includes(w)).length < 2) return null;
   let best = null, score = 0;
-  for (const c of ORDER) { let n = 0; for (const w of CATEGORIES[c]) if (h.includes(w)) n += title.toLowerCase().includes(w) ? 2 : 1; if (n > score) { score = n; best = c; } }
+  // 점수가 같으면 더 구체적인 분야(미분양 → 세법 → 개발 → 금융·정책 → 주택 일반) 우선
+  for (const c of ['미분양', '부동산 세법', '재개발·재건축·개발', '금융·대출·정책', '주택·분양·전세']) { let n = 0; for (const w of CATEGORIES[c]) if (h.includes(w)) n += title.toLowerCase().includes(w) ? 2 : 1; if (n > score) { score = n; best = c; } }
   return best;
 }
 const safeLink = (u) => { try { const x = new URL(String(u).trim()); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch { return ''; } };
@@ -103,7 +107,7 @@ function create({ dataRoot, log = (...a) => console.log('[뉴스]', ...a), fetch
   async function naver() {
     if (!env.NAVER_CLIENT_ID || !env.NAVER_CLIENT_SECRET) return { items: [], status: null };
     const items = [];
-    for (const [cat, q] of Object.entries({ '주택시장': '아파트 전세 미분양', '개발': '재개발 재건축 분양', '세법': '양도세 종부세 취득세', '정책·금융': '국토교통부 대출규제' })) {
+    for (const [cat, q] of Object.entries({ '주택·분양·전세': '아파트 전세 분양', '재개발·재건축·개발': '재개발 재건축', '부동산 세법': '양도세 종부세 취득세', '금융·대출·정책': '국토교통부 대출규제', '미분양': '미분양 아파트' })) {
       const j = JSON.parse(await get(`https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(q)}&display=15&sort=date`, { 'X-Naver-Client-Id': env.NAVER_CLIENT_ID, 'X-Naver-Client-Secret': env.NAVER_CLIENT_SECRET }));
       for (const it of j.items || []) {
         const link = safeLink(it.originallink || it.link); if (!link) continue;
@@ -172,8 +176,10 @@ function create({ dataRoot, log = (...a) => console.log('[뉴스]', ...a), fetch
   }
   function view(isAdmin) {
     const c = cache || { date: null, fetchedAt: null, items: [] };
-    const out = { date: c.date, fetchedAt: c.fetchedAt, stale: c.date !== kstDate(now()), items: (c.items || []).map(({ via, ...n }) => n) };
-    if (isAdmin) Object.assign(out, { lastAttemptAt: c.lastAttemptAt || null, lastError: c.lastError || null, sources: c.sources || {}, naverConfigured: !!(env.NAVER_CLIENT_ID && env.NAVER_CLIENT_SECRET), disabled: env.NEWS_DISABLED === '1' });
+    // 수집 실패를 숨기지 않도록 마지막 시도 시각·실패 사유는 모든 사용자에게 표시 (출처별 상세는 대표만)
+    const failed = Object.entries(c.sources || {}).filter(([, v]) => !v.ok).map(([k]) => k);
+    const out = { date: c.date, fetchedAt: c.fetchedAt, stale: c.date !== kstDate(now()), lastAttemptAt: c.lastAttemptAt || null, lastError: c.lastError || null, failedSources: failed.length, disabled: env.NEWS_DISABLED === '1', items: (c.items || []).map(({ via, ...n }) => n) };
+    if (isAdmin) Object.assign(out, { sources: c.sources || {}, failedSourceNames: failed, naverConfigured: !!(env.NAVER_CLIENT_ID && env.NAVER_CLIENT_SECRET) });
     return out;
   }
   return { start, refresh, view, due, dir, _select: select, _parse: parseRss };
