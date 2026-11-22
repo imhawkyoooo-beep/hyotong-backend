@@ -305,6 +305,8 @@ const server=http.createServer((req,res)=>{
   if(url.pathname==='/login.html' && (req.method==='GET'||req.method==='HEAD')) { res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}); return fs.createReadStream(path.join(ROOT,'login.html')).pipe(res); }
   if(url.pathname==='/signup.html' && (req.method==='GET'||req.method==='HEAD')) { res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}); return fs.createReadStream(path.join(ROOT,'signup.html')).pipe(res); }
   if(url.pathname==='/api/health' && req.method==='GET') return sendJson(res,200,{ok:true,app:'효신통합관리'});
+  // 공개 홈페이지용 뉴스 읽기 전용 API: 업무 데이터나 관리자 기능은 노출하지 않습니다.
+  if(url.pathname==='/api/public/news' && req.method==='GET') return sendJson(res,200,{ok:true,...news.view(false)});
   if(url.pathname.startsWith('/api/')){
     if(!requireAuth(req,res)) return;
     if(url.pathname==='/api/db'&&req.method==='GET') { const session=getSessionInfo(req); return sendJson(res,200,visibleDb(session)); }
@@ -408,12 +410,18 @@ const server=http.createServer((req,res)=>{
     }
     return send(res,404,'Not Found');
   }
+  // 회사 홈페이지 첫 화면은 비로그인 방문객에게 공개합니다.
+  if((url.pathname==='/' || url.pathname==='/index.html') && (req.method==='GET'||req.method==='HEAD')) {
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});
+    if(req.method==='HEAD') return res.end();
+    return fs.createReadStream(path.join(ROOT,'public-home.html')).pipe(res);
+  }
   const currentSession=getSessionInfo(req);
   if(!currentSession){ if(req.method==='GET'||req.method==='HEAD') {res.writeHead(302,{Location:'/login.html','Cache-Control':'no-store'});return res.end();} return send(res,401,'로그인이 필요합니다.'); }
   if(url.pathname==='/admin.html' && currentSession.role!=='admin') return send(res,403,'관리자 권한이 필요합니다.');
   if(req.method!=='GET'&&req.method!=='HEAD') return send(res,405,'Method Not Allowed');
   // 화면 파일만 제공 (데이터·비밀번호·백업·첨부 폴더는 직접 접근 불가)
-  const requested=url.pathname==='/'?'index.html':decodeParam(url.pathname.slice(1));
+  const requested=(url.pathname==='/erp' || url.pathname==='/erp/')?'index.html':url.pathname==='/'?'index.html':decodeParam(url.pathname.slice(1));
   const file=path.resolve(ROOT,requested);
   const blocked=[DB_FILE,AUTH_FILE].includes(file)||[UPLOAD_DIR,BACKUP_DIR,REPORTS_DIR,NEWS_DIR].some(d=>file.startsWith(d+path.sep))||/\.(js|ps1|bat|json|tmp)$/i.test(file);
   if(!file.startsWith(ROOT+path.sep)||blocked||!fs.existsSync(file)||!fs.statSync(file).isFile())return send(res,404,'Not Found');
