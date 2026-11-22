@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="주식회사 효신(曉晨) 공식 홈페이지. 회사 소개, 연혁, 지명원 및 부동산 소식.">
+<title>주식회사 효신(曉晨) | 공식 홈페이지</title>
+<style>
+:root{--navy:#14243c;--navy2:#203b5e;--gold:#c49a55;--ink:#243247;--muted:#64748b;--paper:#f7f5f0;--line:#e5e0d7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif;background:#fff;line-height:1.65}
+a{color:inherit;text-decoration:none}.topbar{background:var(--navy);color:#fff;padding:18px 5vw;display:flex;justify-content:space-between;align-items:center;gap:20px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px #0c193022}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}.brand strong{font-size:clamp(20px,2.2vw,29px);letter-spacing:-.06em}.brand .hanja{font-family:"Batang","Noto Serif KR",serif;color:#e4c58e;font-size:.9em;margin-left:4px}.brand small{font-size:12px;color:#d2d8e2;letter-spacing:.04em}
+nav{display:flex;gap:clamp(10px,2vw,26px);font-size:14px;flex-wrap:wrap}nav a{color:#e8edf5}nav a:hover{color:#e4c58e}
+.hero{min-height:570px;padding:90px 7vw 78px;background:linear-gradient(115deg,#14243cf5,#203b5edc),radial-gradient(circle at 80% 25%,#c49a55 0,transparent 32%);color:#fff;display:flex;align-items:center}.hero-inner{max-width:1180px;margin:auto;width:100%}.eyebrow{color:#e4c58e;letter-spacing:.22em;font-size:12px;font-weight:700}.hero h1{font-size:clamp(36px,6vw,66px);line-height:1.17;letter-spacing:-.055em;margin:20px 0 22px;max-width:860px}.hero p{font-size:clamp(15px,1.8vw,19px);color:#dbe4f0;max-width:720px;margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}.btn{display:inline-block;padding:12px 20px;border-radius:5px;border:1px solid #d7bd8b;font-weight:700;font-size:14px}.btn.gold{background:#c49a55;color:#17263b;border-color:#c49a55}.btn.ghost{color:white;border-color:#9cacc0}
+.wrap{max-width:1180px;margin:auto;padding:78px 26px}.section-head{margin-bottom:28px}.section-head .eyebrow{color:#a77c3b}.section-head h2{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.05em;margin:8px 0}.section-head p{color:var(--muted);margin:0}
+.intro-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}.intro-copy{font-size:16px;color:#465367}.intro-copy strong{color:var(--navy)}.seal{min-height:270px;background:linear-gradient(145deg,#f6f2e9,#e9e1d1);display:grid;place-items:center;border:1px solid #e2d8c7;border-radius:8px}.seal-mark{text-align:center;color:var(--navy)}.seal-mark .hanja{font-family:"Batang","Noto Serif KR",serif;font-size:68px;letter-spacing:.16em;color:#a77c3b}.seal-mark strong{display:block;font-size:19px;letter-spacing:.12em}
+.paper{background:var(--paper)}.news-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.news-card{background:#fff;border:1px solid var(--line);border-radius:7px;padding:22px;min-height:160px}.news-card .tag{color:#a77c3b;font-size:11px;letter-spacing:.12em;font-weight:700}.news-card h3{margin:8px 0;font-size:19px;color:var(--navy)}.news-card p{margin:0;color:var(--muted);font-size:14px}
+.saying{background:var(--navy);color:white;padding:32px;border-radius:8px;margin-bottom:18px}.saying .hanja{font-family:"Batang","Noto Serif KR",serif;color:#e5c58e;font-size:25px;letter-spacing:.1em}.saying h3{font-size:21px;margin:8px 0}.saying p{margin:0;color:#d4deea}
+.timeline{border-left:2px solid #d7c39e;margin-left:10px;padding-left:28px}.event{position:relative;margin:0 0 25px}.event:before{content:"";position:absolute;left:-36px;top:8px;width:13px;height:13px;border-radius:50%;background:var(--gold);border:3px solid #fff;box-shadow:0 0 0 1px var(--gold)}.event b{color:#a77c3b;margin-right:14px}
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.doc-card{border:1px solid var(--line);padding:24px;border-radius:7px;background:#fff}.doc-card h3{margin:0 0 8px;color:var(--navy)}.doc-card p{margin:0;color:var(--muted);font-size:14px}.doc-card a{display:inline-block;margin-top:16px;color:#9a7136;font-weight:700;font-size:13px}
+.contact{background:var(--navy2);color:#fff}.contact .section-head p{color:#d4deea}.contact-line{border-top:1px solid #ffffff33;padding:17px 0;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.contact-line span:first-child{color:#e5c58e}
+footer{background:#101d30;color:#c4ccd7;padding:28px 5vw;font-size:12px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}.hero{min-height:480px;padding:65px 7vw}.intro-grid,.news-grid{grid-template-columns:1fr}.docs-grid{grid-template-columns:1fr}.wrap{padding:56px 20px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#home" aria-label="주식회사 효신 공식 홈페이지">
+    <strong>주식회사 효신<span class="hanja">(曉晨)</span></strong>
+    <small>효신통합관리</small>
+  </a>
+  <nav aria-label="주요 메뉴">
+    <a href="#about">회사소개</a><a href="#news">오늘의 소식</a><a href="#history">회사연혁</a><a href="#directory">지명원</a><a href="#contact">문의</a>
+  </nav>
+</header>
+<main>
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="eyebrow">HYOSHIN · 曉晨</div>
+    <h1>새벽을 여는 마음으로<br>신뢰의 내일을 만듭니다.</h1>
+    <p>주식회사 효신은 성실과 신뢰를 바탕으로 고객과 함께 성장하며 새로운 가치를 만들어갑니다.</p>
+    <div class="hero-actions"><a class="btn gold" href="#about">회사 소개 보기</a><a class="btn ghost" href="#directory">회사 지명원</a></div>
+  </div>
+</section>
+<section class="wrap" id="about">
+  <div class="section-head"><div class="eyebrow">ABOUT HYOSHIN</div><h2>회사 소개</h2><p>주식회사 효신(曉晨)의 약속과 경영 철학</p></div>
+  <div class="intro-grid">
+    <div class="intro-copy">
+      <p><strong>주식회사 효신(曉晨)</strong>은 ‘새벽 효(曉)’와 ‘새벽 신(晨)’의 뜻을 담아, 새로운 시작과 밝은 내일을 향한 마음을 회사 이름에 새겼습니다.</p>
+      <p>고객과의 신뢰를 가장 소중한 가치로 삼고, 맡은 일에 책임을 다하며 지속 가능한 성장을 추구합니다.</p>
+      <p>부동산 및 사업 운영 분야에서 축적한 경험을 바탕으로 정확한 정보, 투명한 업무, 책임 있는 서비스를 제공하는 기업을 지향합니다.</p>
+    </div>
+    <div class="seal"><div class="seal-mark"><div class="hanja">曉 晨</div><strong>주식회사 효신</strong><small>성실 · 신뢰 · 책임</small></div></div>
+  </div>
+</section>
+<section class="paper" id="news">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">DAILY BRIEFING</div><h2>오늘의 소식</h2><p>방문객 누구나 읽을 수 있는 뉴스와 오늘의 사자성어</p></div>
+    <div class="news-grid">
+      <article class="news-card"><div class="tag">TODAY'S NEWS</div><h3>부동산·경제 주요 뉴스</h3><p>최신 뉴스는 출처와 원문 링크를 확인한 후 이곳에 표시합니다.</p></article>
+      <article class="news-card"><div class="tag">COMPANY NEWS</div><h3>효신 소식</h3><p>회사 공지와 주요 소식을 방문객에게 안내합니다.</p></article>
+    </div>
+    <div style="height:18px"></div>
+    <article class="saying"><div class="eyebrow">오늘의 사자성어</div><div class="hanja">有志竟成</div><h3>유지경성</h3><p>뜻이 있어 굳게 마음먹으면 마침내 이룬다는 뜻입니다.</p></article>
+  </div>
+</section>
+<section class="wrap" id="history">
+  <div class="section-head"><div class="eyebrow">OUR HISTORY</div><h2>회사 연혁</h2><p>주식회사 효신이 걸어온 길</p></div>
+  <div class="timeline">
+    <div class="event"><b>회사 설립</b><span>설립 연도와 창립 배경을 확인하여 등록할 예정입니다.</span></div>
+    <div class="event"><b>주요 사업 확장</b><span>사업 분야와 주요 성과를 확인하여 연혁에 반영합니다.</span></div>
+    <div class="event"><b>현재</b><span>고객과 함께 성장하는 주식회사 효신</span></div>
+  </div>
+</section>
+<section class="paper" id="directory">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">CORPORATE PROFILE</div><h2>회사 소개서 · 지명원</h2><p>회사 정보를 한눈에 확인할 수 있도록 자료를 제공합니다.</p></div>
+    <div class="docs-grid">
+      <article class="doc-card"><h3>회사 소개서</h3><p>회사 개요, 경영 철학, 주요 사업 및 조직을 소개합니다.</p><a href="mailto:contact@hyoshin-erp.com?subject=회사%20소개서%20문의">자료 요청하기 →</a></article>
+      <article class="doc-card"><h3>회사 연혁</h3><p>창립부터 현재까지의 주요 이력과 사업 성과를 안내합니다.</p><a href="#history">연혁 보기 →</a></article>
+      <article class="doc-card"><h3>지명원</h3><p>사업 수행 역량과 기업 관련 자료를 확인할 수 있도록 준비합니다.</p><a href="mailto:contact@hyoshin-erp.com?subject=지명원%20요청">지명원 요청하기 →</a></article>
+    </div>
+  </div>
+</section>
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">CONTACT</div><h2>주식회사 효신과 함께하세요.</h2><p>회사 소개서 및 지명원 관련 문의를 남겨주세요.</p></div>
+    <div class="contact-line"><span>회사명</span><strong>주식회사 효신(曉晨)</strong></div>
+    <div class="contact-line"><span>업무 시스템</span><a href="/login.html">효신통합관리 로그인 →</a></div>
+    <p style="font-size:13px;color:#d4deea">회사 주소·대표 연락처·공식 이메일은 확인된 정보로 업데이트할 예정입니다.</p>
+  </div>
+</section>
+</main>
+<footer><span>© 주식회사 효신(曉晨). All rights reserved.</span><span>효신통합관리 · 임직원 전용 업무 시스템 <a href="/login.html" style="color:#e5c58e">로그인</a></span></footer>
+</body>
+</html>
