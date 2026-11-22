@@ -412,7 +412,7 @@ const server=http.createServer((req,res)=>{
   }
   // 회사 홈페이지 첫 화면은 비로그인 방문객에게 공개합니다.
   if((url.pathname==='/' || url.pathname==='/index.html') && (req.method==='GET'||req.method==='HEAD')) {
-    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Permissions-Policy':'camera=(), microphone=(), geolocation=()'});
     if(req.method==='HEAD') return res.end();
     return fs.createReadStream(path.join(ROOT,'public-home.html')).pipe(res);
   }
