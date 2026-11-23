@@ -30,7 +30,7 @@ The GitHub Actions workflow `.github/workflows/public-homepage-smoke.yml` runs:
 2. `node --check server.js`
 3. `node scripts/smoke-public-homepage.js`
 
-The smoke test checks public homepage access, public news response, unauthenticated protection for ERP database, account, administrator, search, news, backup, and file endpoints, protected write routes, administrator login, authenticated ERP access, and public sign-up page access.
+The smoke test checks public homepage access both with and without an ERP session, `/index.html` alias behavior, public news response, unauthenticated protection for ERP database, account, administrator, search, news, backup, and file endpoints, protected write routes, administrator login, authenticated ERP access, and public sign-up page access.
 
 ## Official nomination source received
 
