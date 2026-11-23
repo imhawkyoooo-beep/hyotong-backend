@@ -32,22 +32,35 @@ The GitHub Actions workflow `.github/workflows/public-homepage-smoke.yml` runs:
 
 The smoke test checks public homepage access, public news response, unauthenticated protection for ERP database, account, administrator, search, news, backup, and file endpoints, protected write routes, administrator login, authenticated ERP access, and public sign-up page access.
 
-## Business details still required
+## Official nomination source received
 
-Do not invent these details. Confirm them from official company records before replacing placeholders:
-- Legal company name and exact Korean/Chinese character styling
-- Business registration address and main telephone number
-- Official contact email and public inquiry channel
-- Establishment date and verified company milestones
-- Confirmed business lines and service descriptions
-- Approved company profile and nomination/proposal (지명원) files
-- Approved logo, brand colors, and any required legal/footer disclosures
+The owner supplied `효신 지명원_26.11.pdf` (47 pages). The public homepage now uses the source material for:
+- Company profile: ㈜효신글로벌 외 6개 법인, CEO 윤지훈, initial affiliate incorporation date 2014-03-21, and business fields (PDF pp. 6-12).
+- Affiliate history from 2014 through 2025 (PDF p. 7).
+- Business areas: real-estate development, sales agency, advertising agency, facilities management, and rental management (PDF pp. 6, 9-11).
+- Selected project references from the work portfolio (PDF pp. 16-38).
+- Head office address, telephone, fax, and cover email from the cover/location page (PDF pp. 1, 47).
+
+## Publication and privacy decisions
+
+- The public-facing brand requested by the owner remains “주식회사 효신(曉晨)”; the nomination document identifies the operating company as “㈜효신글로벌”. The page distinguishes these rather than silently treating the names as identical.
+- The PDF has two different email addresses (cover/location page: `hyosin5600@naver.com`; submission page 2: `hyoshin2455@nate.com`). The homepage currently uses the cover and head-office-location email. Owner should confirm which mailbox is intended for public inquiries.
+- Pages 13-14 contain subsidiary business registration certificates; pages 40-45 contain detailed real-estate holding/inventory information. These are not exposed on the public homepage by default. Publish only after explicit approval.
+- The PDF itself is not directly linked for public download yet; owner approval is needed because it contains registration and asset details.
+
+## Remaining owner confirmations
+
+- Confirm whether the public inquiry email should be `hyosin5600@naver.com` or `hyoshin2455@nate.com`.
+- Confirm approval of the selected project names and descriptions for public display.
+- Confirm whether any company registration certificates or property-holding pages may be published (default: do not publish).
+- Confirm approved logo/brand assets and any required legal/footer disclosures.
 
 ## Manual review before production
 
 - [ ] Open the public homepage on desktop and mobile.
 - [ ] Verify all navigation anchors and the small ERP link at the far right of the header.
 - [ ] Verify the public news cards show source, date, and safe original links when the cache contains articles.
+- [ ] Review the company name distinction, public email address, and selected project list against the source PDF.
 - [ ] Verify the empty/stale-news states are clear and do not imply current reporting.
 - [ ] Log in as an administrator and confirm dashboard, admin page, logout, and staff management.
 - [ ] Log in as an approved staff member and confirm the correct permissions and dashboard behavior.
