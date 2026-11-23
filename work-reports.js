@@ -90,8 +90,9 @@ function create({ dataRoot, ctx }) {
 
   // ---------- 권한 ----------
   const isAdmin = (s) => s && s.role === 'admin';
-  const canView = (s, r) => !r.deleted && (isAdmin(s) || r.author === s.username || (r.type === 'site' && r.assignee && r.assignee === s.username));
-  const canEdit = (s, r) => !r.deleted && (isAdmin(s) || (r.author === s.username && r.status !== 'approved'));
+  const hasWorkReportsAccess = (s) => !!(s && (isAdmin(s) || (ctx.hasWorkReportsAccess && ctx.hasWorkReportsAccess(s))));
+  const canView = (s, r) => !r.deleted && hasWorkReportsAccess(s);
+  const canEdit = (s, r) => !r.deleted && hasWorkReportsAccess(s);
   const visible = (s) => store.reports.filter((r) => canView(s, r));
 
   function summary(r) {
@@ -127,7 +128,7 @@ function create({ dataRoot, ctx }) {
     for (const x of db.projects || []) if (x && x.name) sites.push({ id: 'projects:' + x.id, name: String(x.name), kind: '사업', status: x.status || '' });
     // 직원이 담당자로 지정된 현장(다른 메뉴 권한이 없어도 선택 가능)
     for (const r of visible(s)) if (r.type === 'site' && !sites.some((x) => x.name === r.siteName)) sites.push({ id: r.siteId || '', name: r.siteName, kind: '보고된 현장', status: '' });
-    const users = isAdmin(s) ? [ctx.adminUsername(), ...staffAccounts()] : [s.username];
+    const users = hasWorkReportsAccess(s) ? [ctx.adminUsername(), ...staffAccounts()] : [s.username];
     return { me: { username: s.username, role: s.role }, sites, users, types: TYPE_LABEL, statuses: STATUS_LABEL, today: kstToday() };
   }
 
@@ -173,7 +174,7 @@ function create({ dataRoot, ctx }) {
 
   function stats(s, month) {
     const m = /^\d{4}-\d{2}$/.test(month) ? month : kstToday().slice(0, 7);
-    const rs = isAdmin(s) ? store.reports.filter((r) => !r.deleted) : store.reports.filter((r) => !r.deleted && r.author === s.username);
+    const rs = hasWorkReportsAccess(s) ? store.reports.filter((r) => !r.deleted) : [];
     const inMonth = rs.filter((r) => String(r.date || r.weekStart || '').startsWith(m));
     const byStaff = {};
     for (const r of inMonth) {
@@ -211,6 +212,7 @@ function create({ dataRoot, ctx }) {
     const s = ctx.getSessionInfo(req);
     if (!s) return json(res, 401, { ok: false, error: 'login_required' });
     const p = url.pathname.replace(/\/+$/, '');
+    if (!hasWorkReportsAccess(s)) return json(res, 403, { ok: false, error: '대표이사가 업무보고 권한을 지정한 직원만 이용할 수 있습니다.' });
     const m = p.match(/^\/api\/reports\/(r_[a-z0-9]+)(?:\/([a-z]+))?$/);
     const isPost = req.method === 'POST';
     if (isPost && !ctx.requireSameOrigin(req, res)) return;
@@ -290,7 +292,7 @@ function create({ dataRoot, ctx }) {
         return json(res, 200, { ok: true, report: summary(r) });
       }
       if (action === 'urgent') {
-        if (!(isAdmin(s) || r.author === s.username)) return json(res, 403, { ok: false, error: '긴급 표시 권한이 없습니다.' });
+        if (!hasWorkReportsAccess(s)) return json(res, 403, { ok: false, error: '업무보고 권한이 없습니다.' });
         const body = await readJson(req, 2000);
         const v = body.urgent === true; if (r.urgent === v) return json(res, 200, { ok: true, report: summary(r) });
         r.history.push({ at: now, by: s.username, action: 'urgent', before: { urgent: !!r.urgent } }); r.urgent = v; r.updatedAt = now;
@@ -298,7 +300,7 @@ function create({ dataRoot, ctx }) {
         return json(res, 200, { ok: true, report: summary(r) });
       }
       if (action === 'delete') {
-        if (!isAdmin(s)) return json(res, 403, { ok: false, error: '대표자만 삭제할 수 있습니다.' });
+        if (!hasWorkReportsAccess(s)) return json(res, 403, { ok: false, error: '업무보고 삭제 권한이 없습니다.' });
         r.deleted = true; r.deletedAt = now; r.deletedBy = s.username; r.history.push({ at: now, by: s.username, action: 'delete' });
         persist(); ctx.addAudit(s.username, 'report-delete', r.id, '삭제 표시(기록 보존)');
         return json(res, 200, { ok: true });
