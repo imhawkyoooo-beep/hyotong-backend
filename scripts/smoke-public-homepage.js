@@ -66,6 +66,26 @@ async function waitFor(url, child) {
     const protectedDb = await fetch(base + '/api/db');
     assert.equal(protectedDb.status, 401, 'ERP database API must remain protected');
 
+    for (const route of [
+      '/api/me',
+      '/api/admin/users',
+      '/api/admin/audit',
+      '/api/search',
+      '/api/search/status',
+      '/api/unified-search',
+      '/api/news',
+      '/api/backup',
+      '/api/file?path=기타문서/example.pdf'
+    ]) {
+      const response = await fetch(base + route, { redirect: 'manual' });
+      assert.equal(response.status, 401, `protected route ${route} must reject unauthenticated visitors`);
+    }
+
+    for (const route of ['/api/db', '/api/restore', '/api/upload', '/api/admin/permissions']) {
+      const response = await fetch(base + route, { method: 'POST', redirect: 'manual' });
+      assert.equal(response.status, 401, `protected write route ${route} must reject unauthenticated visitors`);
+    }
+
     const adminWithoutSession = await fetch(base + '/admin.html', { redirect: 'manual' });
     assert.equal(adminWithoutSession.status, 302, 'administrator page should require a session');
     assert.equal(adminWithoutSession.headers.get('location'), '/login.html');
