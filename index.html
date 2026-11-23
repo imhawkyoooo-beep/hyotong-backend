@@ -306,32 +306,23 @@ function exportCsv(key){
 }
 
 /* ================= 대시보드 ================= */
-const DAILY_IDIOMS=[
-  {hanja:'有志竟成',name:'유지경성',meaning:'뜻이 있어 굳게 마음먹으면 마침내 이룬다는 뜻입니다.'},
-  {hanja:'積小成大',name:'적소성대',meaning:'작은 것도 쌓이면 큰 것을 이룬다는 뜻입니다.'},
-  {hanja:'愚公移山',name:'우공이산',meaning:'꾸준히 노력하면 어려운 일도 결국 이룰 수 있다는 뜻입니다.'},
-  {hanja:'初志一貫',name:'초지일관',meaning:'처음에 세운 뜻을 끝까지 변함없이 지킨다는 뜻입니다.'},
-  {hanja:'一日三秋',name:'일일삼추',meaning:'몹시 기다리는 마음이 간절함을 비유하는 말입니다.'},
-  {hanja:'自强不息',name:'자강불식',meaning:'스스로 힘쓰고 쉬지 않고 노력한다는 뜻입니다.'},
-  {hanja:'信義忠實',name:'신의충실',meaning:'믿음과 의리를 지키고 성실하게 행동한다는 뜻입니다.'}
-];
 function renderDailyIdiom(){
-  const d=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}));
-  const start=new Date(d.getFullYear(),0,0);
-  const day=Math.floor((d-start)/86400000);
-  const item=DAILY_IDIOMS[day%DAILY_IDIOMS.length];
-  $('dashboardIdiom').innerHTML=`<div class="idiom-hanja">${item.hanja}</div><div class="idiom-title">${item.name}</div><p class="idiom-meaning">${item.meaning}</p><div class="idiom-date">${d.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})} 오늘의 사자성어</div>`;
+  $('dashboardIdiom').innerHTML='<div class="idiom-hanja">有志竟成</div><div class="idiom-title">유지경성</div><p class="idiom-meaning">뜻이 있어 굳게 마음먹으면 마침내 이룬다는 뜻입니다.</p><div class="idiom-date">홈페이지와 동일한 오늘의 사자성어</div>';
 }
 async function loadDashboardNews(){
   const box=$('dashboardNews');
   try{
-    const r=await fetch('/api/news',{cache:'no-store'});
+    const r=await fetch('/api/public/news',{cache:'no-store'});
     if(!r.ok) throw new Error('뉴스를 불러오지 못했습니다.');
-    const data=await r.json(), items=(data.items||[]).slice(0,5);
-    if(!items.length){box.innerHTML='<p class="muted">오늘 표시할 뉴스가 아직 없습니다. 뉴스 수집 후 자동으로 표시됩니다.</p>';return;}
-    const safeLink=u=>{try{const x=new URL(String(u));return /^https?:$/.test(x.protocol)?x.href:'#';}catch{return '#';}};
-    box.innerHTML=items.map(x=>`<article class="brief-item"><div class="brief-meta">${esc(x.category||'부동산 뉴스')} · ${esc(x.source||'뉴스')}</div><a href="${safeLink(x.link)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>${x.summary?`<p>${esc(x.summary)}</p>`:''}</article>`).join('');
-    if(data.stale) box.insertAdjacentHTML('beforeend','<div class="brief-meta">이전 수집 뉴스입니다.</div>');
+    const data=await r.json(), items=(data.items||[]).slice(0,6);
+    if(!items.length){box.innerHTML='<p class="muted">홈페이지와 동일하게 오늘의 뉴스가 준비되면 표시됩니다.</p>';return;}
+    const safeLink=u=>{try{const x=new URL(String(u),location.origin);return /^https?:$/.test(x.protocol)?x.href:'#';}catch{return '#';}};
+    box.innerHTML=items.map(x=>{
+      const stamp=x.publishedAt?new Date(x.publishedAt).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      return `<article class="brief-item"><div class="brief-meta">${esc(x.category||'부동산 뉴스')}</div><a href="${safeLink(x.link)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a><p>${esc(x.summary||'기사 원문에서 자세한 내용을 확인할 수 있습니다.')}</p><div class="brief-meta">${esc(x.source||'뉴스')}${stamp?' · '+stamp:''}</div></article>`;
+    }).join('');
+    const date=data.date?'뉴스 기준일 '+esc(data.date)+(data.stale?' · 최신 수집 자료가 아닐 수 있습니다.':''):'';
+    box.insertAdjacentHTML('beforeend',date?'<div class="brief-meta">'+date+'</div>':'');
   }catch(e){box.innerHTML='<p class="muted">뉴스를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>';}
 }
 function renderDashboard(){
