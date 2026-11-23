@@ -110,6 +110,19 @@ tr.editing td{background:#eff6ff}
   </div>
   <div class="panel"><h3>📄 최근 정리된 문서</h3><div class="tablewrap" id="recentDocs"></div></div>
 </section>
+<section id="reports" class="page">
+  <h2 class="title">업무보고</h2>
+  <div class="panel">
+    <div class="toolbar"><strong>업무보고 등록</strong><span class="grow"></span><button class="btn" onclick="loadReports()">새로고침</button></div>
+    <div class="form" style="margin-top:12px">
+      <div><label>보고 종류</label><select id="wrType" onchange="renderReportFields()"><option value="site">현장별 업무보고</option><option value="staff">직원별 업무보고</option><option value="weekly">주간 업무보고</option></select></div>
+      <div id="wrFields" class="wide"></div>
+    </div>
+    <div class="actions"><button class="btn primary" onclick="submitReport()">업무보고 제출</button><span id="wrMsg" class="muted"></span></div>
+  </div>
+  <div class="panel"><div class="toolbar"><strong>보고서 목록</strong><span class="grow"></span><select id="wrFilter" onchange="loadReports()"><option value="">전체 종류</option><option value="site">현장별</option><option value="staff">직원별</option><option value="weekly">주간</option></select><select id="wrStatus" onchange="loadReports()"><option value="">전체 상태</option><option value="submitted">제출</option><option value="approved">승인</option><option value="rejected">반려</option><option value="revision">보완요청</option></select></div><div id="wrList" class="tablewrap">불러오는 중…</div></div>
+  <div class="panel" id="wrDetail" hidden></div>
+</section>
 <section id="docs" class="page">
   <h2 class="title">문서관리</h2>
   <div class="panel">
@@ -182,7 +195,7 @@ const MODULES={
   {k:'revenue',l:'예상수익',t:'money'},{k:'end',l:'분양마감일',t:'date'},{k:'memo',l:'메모',t:'memo'}],
   calc:[{l:'계약률',f:x=>num(x.units)?(num(x.contracts)/num(x.units)*100).toFixed(1)+'%':'-'}]}
 };
-const NAV=[['dashboard','대표 대시보드'],...Object.values(MODULES).map(m=>[m.page,m.title]),['docs','문서']];
+const NAV=[['dashboard','대표 대시보드'],...Object.values(MODULES).map(m=>[m.page,m.title]),['reports','업무보고'],['docs','문서']];
 const editing={}; // 모듈별 수정 중인 항목 id
 
 /* ================= 화면 만들기 ================= */
@@ -204,6 +217,18 @@ function buildPages(){
     docs.before(s);
   }
 }
+
+let wrMeta=null, wrAdmin=false, wrReports=[];
+async function wrApi(url,opt){const r=await fetch(url,opt);let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'업무보고 요청에 실패했습니다.');return d;}
+async function initWorkReports(){try{const d=await wrApi('/api/reports/meta');wrMeta=d;wrAdmin=d.me.role==='admin';const b=document.querySelector('#nav button[data-page="reports"]');if(b)b.hidden=false;renderReportFields();await loadReports();}catch(e){const b=document.querySelector('#nav button[data-page="reports"]');if(b)b.hidden=true;}}
+function renderReportFields(){const t=$('wrType').value;const common='<div><label>보고일</label><input id="wrDate" type="date" value="'+todayStr()+'"></div>';let fields='';if(t==='site')fields=common+'<div><label>현장명</label><input id="wrSite" maxlength="100" placeholder="현장명을 입력하세요"></div><div><label>담당자</label><select id="wrAssignee"><option value="">미지정</option>'+((wrMeta?.users||[]).map(x=>'<option>'+esc(x)+'</option>').join(''))+'</select></div><div class="wide"><label>업무 내용</label><textarea id="wrContent" rows="4" maxlength="5000"></textarea></div><div class="wide"><label>협의·이슈</label><textarea id="wrIssues" rows="2"></textarea></div><div><label>진행률(%)</label><input id="wrProgress" type="number" min="0" max="100"></div>';
+else if(t==='staff')fields=common+'<div><label>직원 이름</label><input id="wrStaffName" maxlength="40"></div><div><label>부서</label><input id="wrDept" maxlength="60"></div><div class="wide"><label>담당 업무 및 결과</label><textarea id="wrResults" rows="4" maxlength="5000"></textarea></div><div class="wide"><label>진행 중 업무</label><textarea id="wrInProgress" rows="2"></textarea></div><div class="wide"><label>문제·이슈</label><textarea id="wrIssues" rows="2"></textarea></div>';
+else fields='<div><label>주간 시작일</label><input id="wrWeek" type="date" value="'+todayStr()+'"></div><div><label>목표 수치</label><input id="wrTarget" type="number" min="0"></div><div><label>실적 수치</label><input id="wrActual" type="number" min="0"></div><div class="wide"><label>주간 목표 및 결과</label><textarea id="wrResultText" rows="4" maxlength="5000"></textarea></div><div class="wide"><label>현장 상황 및 다음 계획</label><textarea id="wrNextPlan" rows="3"></textarea></div>';
+$('wrFields').innerHTML=fields;}
+async function submitReport(){const t=$('wrType').value;let body={type:t};if(t==='site')Object.assign(body,{date:$('wrDate').value,siteName:$('wrSite').value,assignee:$('wrAssignee').value,content:$('wrContent').value,issues:$('wrIssues').value,progress:$('wrProgress').value});else if(t==='staff')Object.assign(body,{date:$('wrDate').value,staffName:$('wrStaffName').value,dept:$('wrDept').value,results:$('wrResults').value,inProgress:$('wrInProgress').value,issues:$('wrIssues').value});else Object.assign(body,{weekStart:$('wrWeek').value,target:$('wrTarget').value,actual:$('wrActual').value,resultText:$('wrResultText').value,nextPlan:$('wrNextPlan').value});try{await wrApi('/api/reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});$('wrMsg').textContent='제출했습니다.';renderReportFields();await loadReports();}catch(e){$('wrMsg').textContent=e.message;}}
+async function loadReports(){try{const q=new URLSearchParams();if($('wrFilter').value)q.set('type',$('wrFilter').value);if($('wrStatus').value)q.set('status',$('wrStatus').value);const d=await wrApi('/api/reports?'+q.toString());wrReports=d.reports||[];$('wrList').innerHTML=wrReports.length?'<table><thead><tr><th>보고일</th><th>종류</th><th>제목</th><th>작성자</th><th>상태</th><th>보기</th></tr></thead><tbody>'+wrReports.map(x=>'<tr><td>'+esc(x.date||x.weekStart||'')+'</td><td>'+esc(x.typeLabel)+'</td><td>'+esc(x.title)+'</td><td>'+esc(x.authorName||x.author)+'</td><td>'+esc(x.statusLabel)+'</td><td><button class="btn" onclick="viewReport(\''+x.id+'\')">열기</button></td></tr>').join('')+'</tbody></table>':'<p class="muted">등록된 업무보고가 없습니다.</p>';}catch(e){$('wrList').textContent=e.message;}}
+async function viewReport(id){try{const d=await wrApi('/api/reports/'+id);const r=d.report;$('wrDetail').hidden=false;$('wrDetail').innerHTML='<h3>'+esc(r.title)+'</h3><p>'+esc(r.typeLabel)+' · '+esc(r.authorName||r.author)+' · '+esc(r.statusLabel)+'</p><pre style="white-space:pre-wrap;font-family:inherit">'+esc([r.content,r.results,r.resultText,r.issues,r.inProgress,r.nextPlan].filter(Boolean).join('\n\n'))+'</pre>'+(r.attachments||[]).map(a=>'<p><a href="/api/reports/'+id+'/file?att='+encodeURIComponent(a.id)+'" target="_blank">'+esc(a.name)+'</a></p>').join('')+(d.canReview?'<div class="actions"><button class="btn primary" onclick="reviewReport(\''+id+'\',\'approve\')">승인</button><button class="btn" onclick="reviewReport(\''+id+'\',\'revision\')">보완요청</button><button class="btn" onclick="reviewReport(\''+id+'\',\'reject\')">반려</button></div>':'')+'<button class="btn" onclick="$(\'wrDetail\').hidden=true">닫기</button>';}catch(e){$('wrMsg').textContent=e.message;}}
+async function reviewReport(id,action){let comment='';if(action!=='approve'){comment=prompt('사유를 입력하세요.');if(!comment)return;}try{await wrApi('/api/reports/'+id+'/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,comment})});await loadReports();await viewReport(id);}catch(e){alert(e.message);}}
 function goPage(id){
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
@@ -639,6 +664,7 @@ window.addEventListener('dragleave',e=>{if(hasFiles(e)&&--dragDepth<=0)dragOff()
 window.addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();dragOff();goPage('dashboard');collectDropped(e.dataTransfer).then(handleFiles)});
 
 buildPages();
+$('nav button[data-page="reports"]').hidden=true;
 CATS.forEach(c=>$('docFilter').add(new Option(CAT_LABEL[c],c)));
 $('docFilter').onchange=renderFiles; $('docSearch').oninput=renderFiles;
 $('docDrop').onclick=()=>filePick.click();
@@ -653,6 +679,7 @@ render();
 loadDatabase();
 renderDailyIdiom();
 loadDashboardNews();
+initWorkReports();
 </script>
 </body>
 </html>
