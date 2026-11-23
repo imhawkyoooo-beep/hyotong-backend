@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="주식회사 효신(曉晨) 공식 홈페이지. 회사 개요, 부동산개발·분양대행·광고대행·시설관리·임대관리, 주요 업무실적 및 회사 지명원.">
+<title>주식회사 효신(曉晨) | 공식 홈페이지</title>
+<style>
+:root{--navy:#14243c;--navy2:#203b5e;--gold:#c49a55;--ink:#243247;--muted:#64748b;--paper:#f7f5f0;--line:#e5e0d7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif;background:#fff;line-height:1.65}
+a{color:inherit;text-decoration:none}.topbar{background:var(--navy);color:#fff;padding:18px 5vw;display:flex;justify-content:space-between;align-items:center;gap:20px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px #0c193022}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}.brand strong{font-size:clamp(20px,2.2vw,29px);letter-spacing:-.06em}.brand .hanja{font-family:"Batang","Noto Serif KR",serif;color:#e4c58e;font-size:.9em;margin-left:4px}.brand small{font-size:12px;color:#d2d8e2;letter-spacing:.04em}
+nav{display:flex;gap:clamp(10px,2vw,26px);font-size:14px;flex-wrap:wrap;margin-left:auto}nav a{color:#e8edf5}nav a:hover{color:#e4c58e}.erp-access{font-size:11px;color:#e5c58e;white-space:nowrap;letter-spacing:.03em;margin-left:24px}
+.hero{min-height:570px;padding:90px 7vw 78px;background:linear-gradient(115deg,#14243cf5,#203b5edc),radial-gradient(circle at 80% 25%,#c49a55 0,transparent 32%);color:#fff;display:flex;align-items:center}.hero-inner{max-width:1180px;margin:auto;width:100%}.eyebrow{color:#e4c58e;letter-spacing:.22em;font-size:12px;font-weight:700}.hero h1{font-size:clamp(36px,6vw,66px);line-height:1.17;letter-spacing:-.055em;margin:20px 0 22px;max-width:860px}.hero p{font-size:clamp(15px,1.8vw,19px);color:#dbe4f0;max-width:720px;margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}.btn{display:inline-block;padding:12px 20px;border-radius:5px;border:1px solid #d7bd8b;font-weight:700;font-size:14px}.btn.gold{background:#c49a55;color:#17263b;border-color:#c49a55}.btn.ghost{color:white;border-color:#9cacc0}
+.wrap{max-width:1180px;margin:auto;padding:78px 26px}.section-head{margin-bottom:28px}.section-head .eyebrow{color:#a77c3b}.section-head h2{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.05em;margin:8px 0}.section-head p{color:var(--muted);margin:0}
+.intro-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}.intro-copy{font-size:16px;color:#465367}.intro-copy strong{color:var(--navy)}.seal{min-height:270px;background:linear-gradient(145deg,#f6f2e9,#e9e1d1);display:grid;place-items:center;border:1px solid #e2d8c7;border-radius:8px}.seal-mark{text-align:center;color:var(--navy)}.seal-mark .hanja{font-family:"Batang","Noto Serif KR",serif;font-size:68px;letter-spacing:.16em;color:#a77c3b}.seal-mark strong{display:block;font-size:19px;letter-spacing:.12em}
+.paper{background:var(--paper)}.news-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.news-card{background:#fff;border:1px solid var(--line);border-radius:7px;padding:22px;min-height:160px}.news-card .tag{color:#a77c3b;font-size:11px;letter-spacing:.12em;font-weight:700}.news-card h3{margin:8px 0;font-size:19px;color:var(--navy)}.news-card p{margin:0;color:var(--muted);font-size:14px}
+.saying{background:var(--navy);color:white;padding:32px;border-radius:8px;margin-bottom:18px}.saying .hanja{font-family:"Batang","Noto Serif KR",serif;color:#e5c58e;font-size:25px;letter-spacing:.1em}.saying h3{font-size:21px;margin:8px 0}.saying p{margin:0;color:#d4deea}
+.timeline{border-left:2px solid #d7c39e;margin-left:10px;padding-left:28px}.event{position:relative;margin:0 0 25px}.event:before{content:"";position:absolute;left:-36px;top:8px;width:13px;height:13px;border-radius:50%;background:var(--gold);border:3px solid #fff;box-shadow:0 0 0 1px var(--gold)}.event b{color:#a77c3b;margin-right:14px}
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.doc-card{border:1px solid var(--line);padding:24px;border-radius:7px;background:#fff}.doc-card h3{margin:0 0 8px;color:var(--navy)}.doc-card p{margin:0;color:var(--muted);font-size:14px}.doc-card a{display:inline-block;margin-top:16px;color:#9a7136;font-weight:700;font-size:13px}
+.contact{background:var(--navy2);color:#fff}.contact .section-head p{color:#d4deea}.contact-line{border-top:1px solid #ffffff33;padding:17px 0;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.contact-line span:first-child{color:#e5c58e}
+footer{background:#101d30;color:#c4ccd7;padding:28px 5vw;font-size:12px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}nav{margin-left:0}.erp-access{margin-left:0}.hero{min-height:480px;padding:65px 7vw}.intro-grid,.news-grid{grid-template-columns:1fr}.docs-grid{grid-template-columns:1fr}.wrap{padding:56px 20px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#home" aria-label="주식회사 효신 공식 홈페이지">
+    <strong>주식회사 효신<span class="hanja">(曉晨)</span></strong>
+  </a>
+  <nav aria-label="주요 메뉴">
+    <a href="#about">회사소개</a><a href="#business">사업분야</a><a href="#news">오늘의 소식</a><a href="#history">회사연혁</a><a href="#performance">업무실적</a><a href="#directory">지명원</a><a href="#contact">문의</a>
+  </nav>
+  <a class="erp-access" href="/login.html">효신통합관리</a>
+</header>
+<main>
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="eyebrow">HYOSHIN · 曉晨</div>
+    <h1>새벽을 여는 마음으로<br>신뢰의 내일을 만듭니다.</h1>
+    <p>주식회사 효신은 성실과 신뢰를 바탕으로 고객과 함께 성장하며 새로운 가치를 만들어갑니다.</p>
+    <div class="hero-actions"><a class="btn gold" href="#about">회사 소개 보기</a><a class="btn ghost" href="#directory">회사 지명원</a></div>
+  </div>
+</section>
+<section class="wrap" id="about">
+  <div class="section-head"><div class="eyebrow">ABOUT HYOSHIN</div><h2>회사 소개</h2><p>주식회사 효신(曉晨)의 약속과 경영 철학</p></div>
+  <div class="intro-grid">
+    <div class="intro-copy">
+      <p><strong>주식회사 효신(曉晨)</strong> · 지명원 표기 법인명은 <strong>㈜효신글로벌</strong>은 ‘새벽 효(曉)’와 ‘새벽 신(晨)’의 뜻을 담아, 새로운 시작과 밝은 내일을 향한 마음을 회사 이름에 새겼습니다.</p>
+      <p>고객과의 신뢰를 가장 소중한 가치로 삼고, 맡은 일에 책임을 다하며 지속 가능한 성장을 추구합니다.</p>
+      <p>지명원에 기재된 주요 사업은 부동산개발, 분양대행, 광고대행, 시설관리 및 임대관리입니다. 부동산 사업기획·상품기획, 금융컨설팅, 사업타당성 검토, 프로젝트 관리와 주거·업무·상업용 부동산 마케팅을 수행합니다.</p>
+    </div>
+    <div class="seal"><div class="seal-mark"><div class="hanja">曉 晨</div><strong>㈜효신글로벌</strong><small>성실 · 신뢰 · 책임</small></div></div>
+  </div>
+</section>
+<section class="wrap" id="business">
+  <div class="section-head"><div class="eyebrow">BUSINESS AREAS</div><h2>주요 사업분야</h2><p>지명원 회사소개 및 사업분야(9~11페이지)에 기재된 사업 영역</p></div>
+  <div class="docs-grid">
+    <article class="doc-card"><h3>부동산 개발</h3><p>주거용·업무용·상업용 부동산 개발, 사업 및 상품기획, 금융컨설팅, 사업타당성 검토, 프로젝트 관리</p></article>
+    <article class="doc-card"><h3>분양대행</h3><p>신규분양·미분양·매입형 분양대행, 입주대행, 분양마케팅 계획 수립 및 실행</p></article>
+    <article class="doc-card"><h3>광고대행</h3><p>온라인·오프라인·미디어 광고와 현장 중심의 홍보 및 마케팅</p></article>
+    <article class="doc-card"><h3>시설관리</h3><p>지명원 회사개요에 기재된 사업 분야</p></article>
+    <article class="doc-card"><h3>임대관리</h3><p>지명원 회사개요 및 업무실적에 기재된 임대·관리 업무</p></article>
+  </div>
+</section>
+<section class="paper" id="news">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">DAILY BRIEFING</div><h2>오늘의 소식</h2><p>방문객 누구나 읽을 수 있는 뉴스와 오늘의 사자성어</p></div>
+    <div class="news-grid" id="publicNews"><article class="news-card"><div class="tag">TODAY'S NEWS</div><h3>뉴스를 불러오는 중입니다.</h3><p>잠시만 기다려 주세요.</p></article></div>
+    <p id="newsDate" style="font-size:12px;color:#64748b;margin:12px 0 0"></p>
+    <div style="height:18px"></div>
+    <article class="saying"><div class="eyebrow">오늘의 사자성어</div><div class="hanja">有志竟成</div><h3>유지경성</h3><p>뜻이 있어 굳게 마음먹으면 마침내 이룬다는 뜻입니다.</p></article>
+  </div>
+</section>
+<section class="wrap" id="history">
+  <div class="section-head"><div class="eyebrow">OUR HISTORY</div><h2>회사 연혁</h2><p>주식회사 효신이 걸어온 길</p></div>
+  <div class="timeline">
+    <div class="event"><b>2014년</b><span>㈜효신씨앤에이 설립(자회사 중 최초 법인 설립일 기준)</span></div>
+    <div class="event"><b>2016년</b><span>㈜효신산업개발 설립</span></div>
+    <div class="event"><b>2019년</b><span>㈜효신피앤씨 설립</span></div>
+    <div class="event"><b>2020년</b><span>㈜에이치에스프롭텍, ㈜혜안씨앤에이 설립</span></div>
+    <div class="event"><b>2021년</b><span>㈜효신글로벌 설립</span></div>
+    <div class="event"><b>2022년</b><span>㈜효신대부, ㈜효신파트너스 설립</span></div>
+    <div class="event"><b>2025년</b><span>㈜효신, ㈜다올파트너스 설립</span></div>
+  </div>
+</section>
+<section class="wrap" id="performance">
+  <div class="section-head"><div class="eyebrow">SELECTED PROJECTS</div><h2>주요 업무실적</h2><p>지명원 업무실적(16~38페이지) 중 일부 주요 현장</p></div>
+  <div class="docs-grid">
+    <article class="doc-card"><h3>2026 · e편한세상 신곡 시그니처뷰</h3><p>경기 의정부 · 민간임대 임대 및 일괄매입(공매)</p></article>
+    <article class="doc-card"><h3>2026 · 왜관 월드메르디앙 웰리지</h3><p>경북 칠곡 · 아파트 미분양대행</p></article>
+    <article class="doc-card"><h3>2026 · 하남 지웰에스테이트 감일역</h3><p>경기 하남 · 오피스텔 및 상가 매입형 분양대행</p></article>
+    <article class="doc-card"><h3>2025 · 김제 하동본 아르떼</h3><p>전북 김제 · 아파트 매입형 분양대행</p></article>
+    <article class="doc-card"><h3>2025 · 월산마을 9단지 부영</h3><p>경남 김해 · 아파트 일괄매입</p></article>
+    <article class="doc-card"><h3>2024 · 창원 롯데캐슬 프리미어</h3><p>경남 창원 · 아파트 분양대행</p></article>
+    <article class="doc-card"><h3>2023 · 거제 코아루 파크드림</h3><p>경남 거제 · 아파트 매입형 분양대행</p></article>
+    <article class="doc-card"><h3>2021 · 영성 펜타폴리스</h3><p>충남 천안 · 아파트·상가 분양 관련 업무</p></article>
+    <article class="doc-card"><h3>2020 · 서면 위클리스타</h3><p>부산 · 오피스텔 신규분양대행 및 마케팅기획</p></article>
+  </div>
+</section>
+<section class="paper" id="directory">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">CORPORATE PROFILE</div><h2>회사 소개서 · 지명원</h2><p>회사 정보를 한눈에 확인할 수 있도록 자료를 제공합니다.</p></div>
+    <div class="docs-grid">
+      <article class="doc-card"><h3>회사 개요</h3><p>㈜효신글로벌 외 6개 법인, 대표이사 윤지훈, 2014년 3월 21일(자회사 중 최초 법인 설립일 기준)</p></article>
+      <article class="doc-card"><h3>회사 연혁</h3><p>창립부터 현재까지의 주요 이력과 사업 성과를 확인된 기록에 따라 안내합니다.</p><a href="#history">연혁 보기 →</a></article>
+      <article class="doc-card"><h3>지명원</h3><p>회사소개, 사업분야, 업무실적 및 본사 위치를 담은 공식 지명원 자료입니다. PDF 공개본은 별도 등록 승인 후 제공하겠습니다.</p></article>
+    </div>
+  </div>
+</section>
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">CONTACT</div><h2>주식회사 효신과 함께하세요.</h2><p>회사 소개서 및 지명원 관련 문의를 남겨주세요.</p></div>
+    <div class="contact-line"><span>지명원 표기 회사명</span><strong>㈜효신글로벌</strong></div>
+    <div class="contact-line"><span>주소</span><strong>부산광역시 해운대구 센텀6로 21, 303호(우동, 인텔리움)</strong></div>
+    <div class="contact-line"><span>대표전화</span><a href="tel:0519595600">051-959-5600</a></div>
+    <div class="contact-line"><span>팩스</span><strong>051-959-5601</strong></div>
+    <div class="contact-line"><span>이메일</span><a href="mailto:hyosin5600@naver.com">hyosin5600@naver.com</a></div>
+    <div class="contact-line"><span>업무 시스템</span><a href="/login.html">효신통합관리 로그인 →</a></div>
+    <p style="font-size:13px;color:#d4deea">연락처는 지명원 표지 및 본사 위치 페이지(1·47페이지) 기재 내용을 반영했습니다.</p>
+  </div>
+</section>
+</main>
+<script>
+(function(){
+  const host=document.getElementById('publicNews');
+  const dateNode=document.getElementById('newsDate');
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const safeUrl=s=>{
+    try { const u=new URL(String(s),location.origin); return /^https?:$/.test(u.protocol)?u.href:'#'; }
+    catch { return '#'; }
+  };
+  async function load(){
+    try {
+      const r=await fetch('/api/public/news',{cache:'no-store'});
+      if(!r.ok) throw new Error('news unavailable');
+      const data=await r.json();
+      const items=(data.items||[]).slice(0,6);
+      if(!items.length){
+        host.innerHTML='<article class="news-card"><div class="tag">TODAY\'S NEWS</div><h3>새로운 뉴스가 준비 중입니다.</h3><p>뉴스 수집이 완료되면 최신 소식을 이곳에 표시합니다.</p></article>';
+      } else {
+        host.innerHTML=items.map(item=>{
+          const title=esc(item.title);
+          const summary=esc(item.summary||'기사 원문에서 자세한 내용을 확인할 수 있습니다.');
+          const link=safeUrl(item.link);
+          const source=esc(item.source||'뉴스');
+          const category=esc(item.category||'부동산 뉴스');
+          const stamp=item.publishedAt?new Date(item.publishedAt).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+          return '<article class="news-card"><div class="tag">'+category+'</div><h3><a href="'+link+'" target="_blank" rel="noopener noreferrer">'+title+'</a></h3><p>'+summary+'</p><small style="display:block;margin-top:12px;color:#94a3b8">'+source+(stamp?' · '+stamp:'')+'</small></article>';
+        }).join('');
+      }
+      dateNode.textContent=data.date?'뉴스 기준일 '+data.date+(data.stale?' · 최신 수집 자료가 아닐 수 있습니다.':''):'';
+    } catch(e) {
+      host.innerHTML='<article class="news-card"><div class="tag">TODAY\'S NEWS</div><h3>뉴스를 불러오지 못했습니다.</h3><p>잠시 후 다시 방문해 주세요.</p></article>';
+    }
+  }
+  load();
+})();
+</script>
+<footer><span>© 주식회사 효신(曉晨). All rights reserved.</span><span>효신통합관리 · 임직원 전용 업무 시스템 <a href="/login.html" style="color:#e5c58e">로그인</a></span></footer>
+</body>
+</html>

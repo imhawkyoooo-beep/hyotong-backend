@@ -16,6 +16,6 @@ button:disabled{opacity:.6;cursor:wait}.msg{margin-top:14px;color:#b91c1c;font-s
 const form=document.getElementById('loginForm'),btn=document.getElementById('submit'),msg=document.getElementById('message');
 form.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='';btn.disabled=true;btn.textContent='확인 중…';
 try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:form.username.value.trim(),password:form.password.value})});
-const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'로그인에 실패했습니다.');location.replace('/');}
+const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'로그인에 실패했습니다.');location.replace('/erp');}
 catch(err){msg.textContent=err.message||'서버 연결을 확인해 주세요.';}finally{btn.disabled=false;btn.textContent='로그인';}});
 </script></body></html>
