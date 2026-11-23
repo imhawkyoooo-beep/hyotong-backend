@@ -66,6 +66,18 @@ async function waitFor(url, child) {
     const protectedDb = await fetch(base + '/api/db');
     assert.equal(protectedDb.status, 401, 'ERP database API must remain protected');
 
+    const adminWithoutSession = await fetch(base + '/admin.html', { redirect: 'manual' });
+    assert.equal(adminWithoutSession.status, 302, 'administrator page should require a session');
+    assert.equal(adminWithoutSession.headers.get('location'), '/login.html');
+
+    const privateScript = await fetch(base + '/server.js');
+    assert.equal(privateScript.status, 404, 'server source must not be publicly served');
+    const packageManifest = await fetch(base + '/package.json');
+    assert.equal(packageManifest.status, 404, 'package manifest must not be publicly served');
+
+    const publicNewsWrite = await fetch(base + '/api/public/news', { method: 'POST' });
+    assert.equal(publicNewsWrite.status, 401, 'public news endpoint must remain read-only and reject unauthenticated writes');
+
     const erpWithoutSession = await fetch(base + '/erp', { redirect: 'manual' });
     assert.equal(erpWithoutSession.status, 302, 'ERP screen should redirect unauthenticated visitors');
     assert.equal(erpWithoutSession.headers.get('location'), '/login.html');
