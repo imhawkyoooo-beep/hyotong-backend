@@ -43,7 +43,7 @@ The owner supplied `효신 지명원_26.11.pdf` (47 pages). The public homepage 
 
 ## Publication and privacy decisions
 
-- The public-facing brand requested by the owner remains “주식회사 효신(曉晨)”; the nomination document identifies the operating company as “㈜효신글로벌”. The page distinguishes these rather than silently treating the names as identical.
+- The public-facing brand remains “주식회사 효신(曉晨)”. The owner has clarified that the representative legal entity name to display is “㈜효신씨앤에이”; the page now uses that name in the company introduction, seal, company overview, and contact section. The 2021 establishment of “㈜효신글로벌” remains only as a historical affiliate entry.
 - The PDF has two different email addresses (cover/location page: `hyosin5600@naver.com`; submission page 2: `hyoshin2455@nate.com`). The homepage currently uses the cover and head-office-location email. Owner should confirm which mailbox is intended for public inquiries.
 - Pages 13-14 contain subsidiary business registration certificates; pages 40-45 contain detailed real-estate holding/inventory information. These are not exposed on the public homepage by default. Publish only after explicit approval.
 - The PDF itself is not directly linked for public download yet; owner approval is needed because it contains registration and asset details.
