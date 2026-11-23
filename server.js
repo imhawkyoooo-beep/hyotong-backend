@@ -27,10 +27,10 @@ const REPORTS_DIR = path.join(DATA_ROOT, 'work-reports');
 const NEWS_DIR = path.join(DATA_ROOT, 'news');
 const { unifiedSearch } = require('./unified-search');
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
-const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs'];
+const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs','workReports'];
 const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','업무보고':'docs','기타문서':'docs'};
 function permissionsFor(session){ if(session.role==='admin') return [...PERMISSION_KEYS]; const u=findStaff(session.username); return u&&Array.isArray(u.permissions)?u.permissions.filter(k=>PERMISSION_KEYS.includes(k)):[]; }
-function canCategory(session,cat){ return session.role==='admin' || permissionsFor(session).includes(CATEGORY_PERMISSION[cat]||'docs'); }
+function canCategory(session,cat){ if(!session) return false; if(session.role==='admin') return true; const p=permissionsFor(session); if(cat==='업무보고') return p.includes('workReports'); return p.includes(CATEGORY_PERMISSION[cat]||'docs'); }
 function visibleDb(session){ const d=readDb(); if(session.role==='admin') return d; const allowed=permissionsFor(session); const out={...DEFAULT_DB}; for(const k of REQUIRED_DB_KEYS){ if(allowed.includes(k)) out[k]=d[k]; } out.files=(d.files||[]).filter(f=>canCategory(session,f.category)); return out; }
 // 파일 자동분류 카테고리 = uploads 아래 폴더 이름
 const CATEGORIES = ['사업관리','부동산자산','재무자금','세무회계','인사','영업분양','업무보고','기타문서'];
@@ -209,7 +209,7 @@ function handleUpload(req,res,url){
 }
 
 // [업무보고] 권한 검사는 모듈 안에서 세션 기준으로 수행 / [뉴스] 하루 한 번 자동 수집
-const workReports = require('./work-reports').create({dataRoot:DATA_ROOT, ctx:{getSessionInfo, visibleDb, sendJson, readBody, requireSameOrigin, decodeParam, addAudit, adminUsername, staffUsers:()=>staffUsers}});
+const workReports = require('./work-reports').create({dataRoot:DATA_ROOT, ctx:{getSessionInfo, visibleDb, sendJson, readBody, requireSameOrigin, decodeParam, addAudit, adminUsername, staffUsers:()=>staffUsers, hasWorkReportsAccess:(session)=>session?.role==='admin'||permissionsFor(session).includes('workReports')}});
 const news = require('./news').create({dataRoot:DATA_ROOT});
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
