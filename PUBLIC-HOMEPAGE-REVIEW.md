@@ -55,6 +55,16 @@ The owner supplied `효신 지명원_26.11.pdf` (47 pages). The public homepage 
 - Confirm whether any company registration certificates or property-holding pages may be published (default: do not publish).
 - Confirm approved logo/brand assets and any required legal/footer disclosures.
 
+## Deployment configuration review (read-only)
+
+- Compared `render.yaml` on `main` and `public-company-homepage`: the file is unchanged (same Git blob SHA).
+- Repository configuration declares a Node web service named `hyotong-api`, starts with `npm start`, and uses `/api/health` as its health check.
+- The declared persistent disk is `hyotong-data`, mounted at `/var/data` with `DATA_DIR=/var/data` (1 GB).
+- The application derives database, authentication, employee, audit, upload, backup, work-report, news, and search-index paths from `DATA_DIR`; therefore retaining this mount and environment variable is essential to preserve existing data.
+- The homepage PR does not modify `render.yaml`, package startup settings, or the declared persistent-disk configuration.
+- This repository-file review does **not** prove the live Render service currently has the same settings, which Git branch it deploys, which commit is live, or whether the disk is attached and healthy. Those must be checked in the connected Render service before deployment.
+- No Render setting, live service, domain, disk, environment variable, or production deployment has been changed.
+
 ## Manual review before production
 
 - [ ] Open the public homepage on desktop and mobile.
