@@ -28,12 +28,12 @@ const NEWS_DIR = path.join(DATA_ROOT, 'news');
 const { unifiedSearch } = require('./unified-search');
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
 const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs'];
-const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','기타문서':'docs'};
+const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','업무보고':'docs','기타문서':'docs'};
 function permissionsFor(session){ if(session.role==='admin') return [...PERMISSION_KEYS]; const u=findStaff(session.username); return u&&Array.isArray(u.permissions)?u.permissions.filter(k=>PERMISSION_KEYS.includes(k)):[]; }
 function canCategory(session,cat){ return session.role==='admin' || permissionsFor(session).includes(CATEGORY_PERMISSION[cat]||'docs'); }
 function visibleDb(session){ const d=readDb(); if(session.role==='admin') return d; const allowed=permissionsFor(session); const out={...DEFAULT_DB}; for(const k of REQUIRED_DB_KEYS){ if(allowed.includes(k)) out[k]=d[k]; } out.files=(d.files||[]).filter(f=>canCategory(session,f.category)); return out; }
 // 파일 자동분류 카테고리 = uploads 아래 폴더 이름
-const CATEGORIES = ['사업관리','부동산자산','재무자금','세무회계','인사','영업분양','기타문서'];
+const CATEGORIES = ['사업관리','부동산자산','재무자금','세무회계','인사','영업분양','업무보고','기타문서'];
 const MAX_UPLOAD = 100 * 1024 * 1024;
 
 /* ---------- 비밀번호: 처음 한 번 설정하면 auth.json에 암호화(scrypt)해서 저장 ---------- */
