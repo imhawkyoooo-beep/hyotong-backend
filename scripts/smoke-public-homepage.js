@@ -110,6 +110,14 @@ async function waitFor(url, child) {
     const cookie = (login.headers.get('set-cookie') || '').split(';')[0];
     assert.match(cookie, /^hs_session=/);
 
+    const homeWithSession = await fetch(base + '/', { headers: { Cookie: cookie } });
+    assert.equal(homeWithSession.status, 200, 'root address should remain the public company homepage even with an ERP session');
+    assert.match(await homeWithSession.text(), /曉晨/);
+
+    const indexAlias = await fetch(base + '/index.html', { headers: { Cookie: cookie } });
+    assert.equal(indexAlias.status, 200, 'index.html should resolve to the public company homepage');
+    assert.match(await indexAlias.text(), /주식회사 효신/);
+
     const erp = await fetch(base + '/erp', { headers: { Cookie: cookie } });
     assert.equal(erp.status, 200, 'authenticated user should reach ERP');
     assert.match(await erp.text(), /효신통합관리/);
