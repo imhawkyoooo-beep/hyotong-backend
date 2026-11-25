@@ -171,6 +171,40 @@ footer{background:#103e30}
 footer{background:#103e30;color:#c9ecda}
 footer a{color:#b9f0d3!important}
 
+
+/* Wider layout: use the screen width and bring company history directly under the main cards */
+.home-top-grid,.home-bottom-grid{width:100%;max-width:1680px;margin:0 auto;padding:14px clamp(24px,3vw,54px) 0;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);column-gap:34px;row-gap:24px}
+.home-bottom-grid{padding-top:18px}
+.home-top-grid>.wrap,.home-bottom-grid>.wrap,.home-bottom-grid>.paper{min-width:0}
+#about .intro-grid{min-height:190px}
+#business .doc-card{min-height:96px}
+#news .news-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#performance .docs-grid.actual-projects{grid-template-columns:repeat(2,minmax(0,1fr))}
+#performance .actual-projects .doc-card{min-height:220px}
+#performance .actual-projects .doc-card:before{height:140px}
+#history{grid-column:1/-1;width:100%;max-width:none;margin:4px 0 0;padding:0}
+#history .wrap{width:100%;max-width:none;padding:22px 0 10px}
+#history .section-head{margin-bottom:12px}
+#history .timeline{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}
+#history .event{min-width:0;background:#eef8f3;border:1px solid #d9ebe2;border-radius:12px;padding:13px 12px;display:flex;flex-direction:column;gap:7px}
+#history .event:nth-child(even){background:#fff4e9;border-color:#f2e4d5}
+#history .event b{font-size:17px;color:#087449}
+#history .event span{font-size:13px;line-height:1.5;color:#405248}
+#directory{margin-top:20px}
+.hero-photo{height:230px;min-height:230px;background-image:url("https://ik.imagekit.io/tvlk/loc-asset/gNr3hLh55ZCkPJisyxFK-v9MmzxPu57ZRVI%2B10VZ2S4b1PNW4T%2B%2BcbA6yK4gzhAhs9o2HLZ9vs7gy3rpcIU%2BoKi5EygzQLRjTUv7fRblEVA%3D/images/1525318759276-1500x842-FIT_AND_TRIM-37b35af03f89cce4125ce3b9b211e83f.jpeg?tr=dpr-3");background-position:center 48%;background-size:cover}
+.hero{height:230px;min-height:230px}
+.hero-inner{height:230px;min-height:230px}
+@media(max-width:1100px){
+ .home-top-grid,.home-bottom-grid{padding-left:22px;padding-right:22px;column-gap:22px}
+ #history .timeline{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:900px){
+ .home-top-grid,.home-bottom-grid{grid-template-columns:1fr;padding:14px 16px 0;gap:16px}
+ #history{grid-column:1}
+ #history .timeline{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){#history .timeline{grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
 <body>
@@ -234,8 +268,6 @@ footer a{color:#b9f0d3!important}
     <article class="doc-card project-laporte"><h3>라포르테블랑 서현</h3><p>2024 · 경기 성남 · 오피스텔 매입형 분양대행</p></article>
   </div>
 </section>
-</div>
-
 <section class="wrap" id="history">
   <div class="section-head"><div class="eyebrow">OUR HISTORY</div><h2>회사 연혁</h2><p>주식회사 효신이 걸어온 길</p></div>
   <div class="timeline">
@@ -248,6 +280,9 @@ footer a{color:#b9f0d3!important}
     <div class="event"><b>2025년</b><span>㈜효신, ㈜다올파트너스 설립</span></div>
   </div>
 </section>
+</div>
+
+
 <section class="paper" id="directory">
   <div class="wrap">
     <div class="section-head"><div class="eyebrow">CORPORATE PROFILE</div><h2>회사 소개서 · 지명원</h2><p>회사 정보를 한눈에 확인할 수 있도록 자료를 제공합니다.</p></div>
