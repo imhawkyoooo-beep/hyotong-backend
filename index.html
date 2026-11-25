@@ -80,6 +80,89 @@ mark{background:#fef08a;padding:0 1px}
 #serverStatus{position:fixed;bottom:12px;right:12px;padding:10px 14px;border-radius:8px;background:#166534;color:white;z-index:9999;font-size:13px;box-shadow:0 2px 10px #0003;max-width:calc(100vw - 24px)}
 tr.editing td{background:#eff6ff}
 @media(max-width:800px){.grid2{grid-template-columns:1fr}.search-row{flex-wrap:wrap}main{padding:14px}.toolbar input{width:100%}header{padding:14px 16px}}
+
+/* ===== 효신통합관리 새 민트·피치 대시보드 디자인 ===== */
+:root{--hs-green:#17664d;--hs-green-dark:#104b3a;--hs-mint:#eaf6f0;--hs-mint-strong:#d8eee4;--hs-peach:#fff0e6;--hs-cream:#fffdf8;--hs-line:#dce9e2;--hs-text:#20352d;--hs-muted:#718078}
+body{background:#f5f8f6;color:var(--hs-text);font-family:Arial,"Malgun Gothic",sans-serif}
+body>header{position:fixed;inset:0 0 auto 0;height:72px;padding:0 26px 0 28px;background:linear-gradient(100deg,#10543f,#17664d 42%,#f8fcf9 42%,#fff 100%);color:#173d30;border-bottom:1px solid #dce9e2;box-shadow:0 2px 12px #164b3510;z-index:100;display:flex;align-items:center}
+body>header>div:first-child{display:flex;align-items:center;gap:18px;min-width:250px}
+body>header h1{font-size:21px;letter-spacing:-.04em;color:#fff}
+body>header small{font-size:14px;color:#244d3e;opacity:1;font-weight:700}
+body>header>div:last-child{margin-left:auto;color:#365a4c}
+body>header .btn{border-radius:9px;border-color:#cfe0d7}
+body>header .btn[onclick="logout()"]{background:var(--hs-green)!important;color:#fff!important}
+body>nav#nav{position:fixed;z-index:90;left:0;top:72px;bottom:0;width:250px;overflow-y:auto;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:22px 14px;background:linear-gradient(180deg,#f0f8f4,#e8f3ee);border:0;border-right:1px solid #dce9e2;box-shadow:3px 0 14px #194c3510}
+body>nav#nav button{width:100%;min-height:43px;text-align:left;border:1px solid transparent;background:transparent;border-radius:10px;padding:10px 13px;color:#244b3d;font-size:14px;font-weight:700;white-space:normal}
+body>nav#nav button:hover{background:#fff;border-color:#dce9e2}
+body>nav#nav button.active{background:linear-gradient(100deg,#21835f,#17664d);color:white;border-color:#17664d;box-shadow:0 3px 8px #17664d25}
+body>main#main{margin:72px 0 0 250px;max-width:none;padding:28px 30px 42px;min-height:calc(100vh - 72px)}
+h2.title{color:var(--hs-green-dark);font-size:25px;letter-spacing:-.04em;margin:2px 0 20px}
+.search-hero{background:#fff;border:1px solid var(--hs-line);border-radius:15px;padding:16px 18px;box-shadow:0 3px 12px #1e5c4010;margin-bottom:20px}
+.search-hero.dragging{border-color:#26966b;background:#effaf4}
+.search-row input{border-color:#d7e6de;background:#fbfdfb}
+.search-row .btn{background:var(--hs-green);border-color:var(--hs-green);color:#fff}
+.search-row .btn:hover{background:var(--hs-green-dark)}
+.chip{background:#f0f8f4;border-color:#dce9e2;color:#315d4b}
+.dashboard-idiom{width:100%;grid-template-columns:minmax(150px,.25fr) 1fr;margin:0 0 20px;padding:16px 24px;background:linear-gradient(105deg,#e1f4e9 0%,#fffdf6 52%,#ffeadf 100%);border:1px solid #e5c995;box-shadow:0 4px 14px #315a4210}
+.dashboard-idiom-label{color:#98713b}
+.dashboard-idiom-label span{color:var(--hs-green-dark)}
+.dashboard-wisdom-type{background:var(--hs-green)}
+.dashboard-idiom-copy .idiom-hanja{color:var(--hs-green-dark)}
+.dashboard-idiom-copy .idiom-title{background:var(--hs-green)}
+.dashboard-idiom-copy .idiom-meaning{color:#41564b}
+.wisdom-quote{color:var(--hs-green-dark)}
+.cards{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:0 0 20px}
+.card{border:1px solid var(--hs-line);border-radius:14px;background:linear-gradient(145deg,#fff,#f2faf6);box-shadow:0 3px 12px #174d3610;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.card:nth-child(even){background:linear-gradient(145deg,#fff,#fff4ed)}
+.card:hover{transform:translateY(-2px);box-shadow:0 7px 18px #174d3618}
+.card .label{color:#6c8176}
+.card .value{color:var(--hs-green-dark)}
+.grid2{gap:16px;margin-top:18px}
+.panel{border:1px solid var(--hs-line);border-radius:14px;padding:19px;background:#fff;box-shadow:0 3px 12px #174d360c}
+.panel h3{color:var(--hs-green-dark);font-size:17px}
+th{background:#eff7f2;color:#315746}
+td,th{border-bottom-color:#e7eee9}
+tr.total td{background:#f2f8f4}
+input,select,textarea{border-color:#d5e3db;background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid #b7dfca;border-color:#65a887}
+.btn{border-color:#cfe0d7;color:#315746;border-radius:8px}
+.btn:hover{background:#f0f8f4}
+.btn.primary{background:var(--hs-green);border-color:var(--hs-green);color:#fff}
+.btn.primary:hover{background:var(--hs-green-dark)}
+.badge{background:#eaf4ee;color:#315d4b}
+.badge.b-진행,.badge.b-임대중,.badge.b-재직{background:#e1f2e8;color:#17664d}
+.badge.b-완료,.badge.b-납부완료,.badge.b-매각완료{background:#e1f2e8;color:#17664d}
+.badge.b-보류,.badge.b-퇴사,.badge.b-휴직{background:#f1f3f1;color:#69766f}
+.brief-item{border-color:#e1ece5;background:#fbfdfb;border-radius:10px}
+.wr-report-card{border-color:#dce9e2;border-radius:12px}
+.drop{border-color:#b7d8c6;background:#f5fbf7;color:#4e6d5d}
+ul.alerts li{background:#f4faf6}
+ul.alerts li.red{background:#fff0ed}
+ul.alerts li.amber{background:#fff7e9}
+ul.alerts li.ok{background:#eff8f2}
+#serverStatus{background:var(--hs-green)}
+@media(max-width:800px){
+ body>header{position:sticky;height:auto;min-height:66px;padding:12px 14px;background:var(--hs-green);color:#fff;flex-wrap:wrap}
+ body>header>div:first-child{min-width:0;gap:9px;flex-wrap:wrap}
+ body>header h1{font-size:18px}
+ body>header small{font-size:11px;color:#e4f2ea}
+ body>header>div:last-child{gap:6px!important}
+ body>nav#nav{position:sticky;top:0;bottom:auto;width:100%;height:auto;max-height:180px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:9px;background:#eff7f2;border-right:0;border-bottom:1px solid var(--hs-line)}
+ body>nav#nav button{min-height:38px;padding:8px 10px;font-size:12px}
+ body>main#main{margin:0;padding:16px 12px 28px;min-height:0}
+ .dashboard-idiom{grid-template-columns:1fr;gap:8px;padding:13px}
+ .dashboard-idiom-label span{font-size:21px}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .card{padding:13px}
+ .grid2{grid-template-columns:1fr}
+ .search-row{flex-wrap:wrap}
+ .search-row input{min-width:100%}
+}
+@media(min-width:801px) and (max-width:1050px){
+ body>nav#nav{width:215px}
+ body>main#main{margin-left:215px;padding:24px 20px}
+}
+
 </style>
 </head>
 <body>
