@@ -27,7 +27,7 @@ const REPORTS_DIR = path.join(DATA_ROOT, 'work-reports');
 const NEWS_DIR = path.join(DATA_ROOT, 'news');
 const { unifiedSearch } = require('./unified-search');
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
-const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs','workReports'];
+const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs','workReports','workReportsManage'];
 const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','업무보고':'docs','기타문서':'docs'};
 function permissionsFor(session){ if(session.role==='admin') return [...PERMISSION_KEYS]; const u=findStaff(session.username); return u&&Array.isArray(u.permissions)?u.permissions.filter(k=>PERMISSION_KEYS.includes(k)):[]; }
 function canCategory(session,cat){ if(!session) return false; if(session.role==='admin') return true; const p=permissionsFor(session); if(cat==='업무보고') return p.includes('workReports'); return p.includes(CATEGORY_PERMISSION[cat]||'docs'); }
@@ -209,7 +209,7 @@ function handleUpload(req,res,url){
 }
 
 // [업무보고] 권한 검사는 모듈 안에서 세션 기준으로 수행 / [뉴스] 하루 한 번 자동 수집
-const workReports = require('./work-reports').create({dataRoot:DATA_ROOT, ctx:{getSessionInfo, visibleDb, sendJson, readBody, requireSameOrigin, decodeParam, addAudit, adminUsername, staffUsers:()=>staffUsers, hasWorkReportsAccess:(session)=>session?.role==='admin'||permissionsFor(session).includes('workReports')}});
+const workReports = require('./work-reports').create({dataRoot:DATA_ROOT, ctx:{getSessionInfo, visibleDb, sendJson, readBody, requireSameOrigin, decodeParam, addAudit, adminUsername, staffUsers:()=>staffUsers, hasWorkReportsAccess:(session)=>session?.role==='admin'||permissionsFor(session).some(k=>k==='workReports'||k==='workReportsManage'), hasWorkReportsManageAccess:(session)=>session?.role==='admin'||permissionsFor(session).includes('workReportsManage')}});
 const news = require('./news').create({dataRoot:DATA_ROOT});
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
