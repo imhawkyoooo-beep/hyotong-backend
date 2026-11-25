@@ -92,7 +92,7 @@ function create({ dataRoot, ctx }) {
   const isAdmin = (s) => s && s.role === 'admin';
   const hasWorkReportsAccess = (s) => !!(s && (isAdmin(s) || (ctx.hasWorkReportsAccess && ctx.hasWorkReportsAccess(s))));
   const canView = (s, r) => !r.deleted && hasWorkReportsAccess(s);
-  const canEdit = (s, r) => !r.deleted && !!(s && (isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s))));
+  const canEdit = (s, r) => !r.deleted && !!(s && (isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s)) || (r.author === s.username && r.status !== 'approved')));
   const visible = (s) => store.reports.filter((r) => canView(s, r));
 
   function summary(r) {
@@ -216,7 +216,7 @@ function create({ dataRoot, ctx }) {
     const m = p.match(/^\/api\/reports\/(r_[a-z0-9]+)(?:\/([a-z]+))?$/);
     const isPost = req.method === 'POST';
     if (isPost && !ctx.requireSameOrigin(req, res)) return;
-    if (isPost && !(isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s)))) return json(res, 403, { ok: false, error: '업무보고 열람 권한만 있습니다. 작성·수정·삭제는 대표자만 할 수 있습니다.' });
+    if (isPost && p === '/api/reports' && !(isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s)))) return json(res, 403, { ok: false, error: '업무보고 열람 권한만 있습니다. 신규 작성은 대표자만 할 수 있습니다.' });
     try {
       if (p === '/api/reports' && req.method === 'GET') return json(res, 200, { ok: true, ...list(s, url.searchParams) });
       if (p === '/api/reports/meta' && req.method === 'GET') return json(res, 200, { ok: true, ...meta(s) });
@@ -241,6 +241,7 @@ function create({ dataRoot, ctx }) {
       const r = store.reports.find((x) => x.id === m[1]);
       if (!r || !canView(s, r)) return json(res, 404, { ok: false, error: '보고서를 찾을 수 없거나 볼 권한이 없습니다.' });
       const action = m[2] || '';
+      if (isPost && !(isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s)) || (action === 'update' && r.author === s.username && r.status !== 'approved'))) return json(res, 403, { ok: false, error: '본인이 작성한 미승인 업무보고만 수정할 수 있습니다.' });
       if (!action && req.method === 'GET') return json(res, 200, { ok: true, report: summary(r), links: links(s, r), canEdit: canEdit(s, r), canReview: isAdmin(s) });
       if (action === 'file' && req.method === 'GET') {
         if (!canEdit(s, r)) return json(res, 403, { ok: false, error: '첨부파일 다운로드 권한이 없습니다.' });
