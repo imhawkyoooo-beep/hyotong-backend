@@ -86,6 +86,95 @@ footer{background:#103e30;color:#d7e8df}
  .docs-grid{grid-template-columns:1fr}
 }
 
+
+/* Screenshot-inspired two-column corporate homepage */
+.topbar{height:60px;min-height:60px;padding:0 2.5vw 0 0;background:#fff;display:flex;align-items:center;gap:20px;border-bottom:1px solid #dfe9e3}
+.brand{height:60px;min-width:335px;padding:0 28px 0 4.5vw;background:linear-gradient(100deg,#10543f,#17664d);border-radius:0 0 28px 0;display:flex;align-items:center;gap:12px}
+.brand:before{content:"▦";font-size:28px;color:#fff}
+.brand strong{color:#fff;font-size:clamp(18px,2vw,25px)}
+.topbar nav{display:flex;align-items:center;justify-content:center;gap:0;flex:1;margin:0}
+.topbar nav a{color:#182b23;font-weight:700;padding:0 18px;border-right:1px solid #d8e1dc;white-space:nowrap}
+.topbar nav a:last-child{border:0}
+.erp-access{margin:0 0 0 auto;background:#17664d;color:#fff;border-radius:999px;padding:8px 18px;box-shadow:0 2px 7px #17664d22}
+.hero{min-height:208px;padding:0 0 0 7vw;background:linear-gradient(105deg,#f1f8f3,#fffaf2);border-bottom:0;overflow:hidden}
+.hero-inner{max-width:none;width:100%;min-height:208px;margin:0;display:grid;grid-template-columns:43% 57%;align-items:stretch;gap:0}
+.hero-copy{align-self:center;padding:22px 24px 24px 0;position:relative;z-index:2}
+.hero-copy:before{content:"";position:absolute;left:-28px;top:8px;bottom:18px;width:3px;border-radius:3px;background:#24966b}
+.hero .eyebrow{font-size:11px;color:#a77c3b}
+.hero h1{font-size:clamp(30px,3.3vw,43px);line-height:1.16;margin:5px 0 9px;color:#104b37;letter-spacing:-.05em}
+.hero p{font-size:13px;line-height:1.55;color:#42594d;margin:0;max-width:520px}
+.hero-actions{margin-top:12px;gap:10px}
+.hero .btn{padding:7px 17px;font-size:12px}
+.hero .btn.gold{background:#17664d;color:#fff}
+.hero .btn.ghost{background:#fff;color:#17664d;border-color:#17664d}
+.hero-photo{min-height:208px;background-image:linear-gradient(90deg,#fff8ed00,#fff0 20%),url("https://access.visitkorea.or.kr/bfvk_img/call?cmd=VIEW&id=a6617688-bd88-4d08-bd31-2716308dfb62");background-position:center 54%;background-size:cover;clip-path:ellipse(100% 95% at 66% 50%);position:relative}
+.hero-photo:after{content:"";position:absolute;inset:auto 0 0;height:18px;background:linear-gradient(90deg,#ccebdd,#e8f6edaa);opacity:.85}
+.home-top-grid,.home-bottom-grid{max-width:1240px;margin:0 auto;padding:14px 22px 0;display:grid;grid-template-columns:1fr 1.08fr;gap:26px;align-items:start}
+.home-top-grid>.wrap,.home-bottom-grid>.wrap,.home-bottom-grid>.paper{margin:0;max-width:none;width:100%;padding:10px 0 4px;background:transparent}
+.home-top-grid .section-head,.home-bottom-grid .section-head{margin-bottom:12px}
+.home-top-grid .section-head .eyebrow,.home-bottom-grid .section-head .eyebrow{display:none}
+.home-top-grid .section-head h2,.home-bottom-grid .section-head h2{font-size:21px;margin:0 0 5px}
+.home-top-grid .section-head p,.home-bottom-grid .section-head p{display:none}
+#about .intro-grid{grid-template-columns:1fr;gap:0}
+#about .intro-copy{display:none}
+#about .seal{min-height:166px;padding:16px;display:flex;justify-content:center;align-items:center;gap:26px;background:linear-gradient(110deg,#fff9ee,#fff5ed);border-color:#f0dfc5}
+#about .seal:before{content:"";width:42%;height:115px;max-width:180px;background:linear-gradient(90deg,#b98a3f,#f2d18c,#b98a3f);mask: none;opacity:.14}
+#about .seal-mark .hanja{font-size:46px}
+#about .seal-mark strong{font-size:17px}
+#about .seal-mark small{font-size:11px}
+#about .intro-grid{grid-template-columns:.95fr 1.05fr;gap:16px;align-items:center}
+#about .intro-copy{display:block;grid-column:2;grid-row:1;font-size:12px;line-height:1.5}
+#about .intro-copy p{margin:0 0 7px}
+#about .seal{grid-column:1;grid-row:1}
+#about .seal:before,#about .seal:after{content:none}
+@media(max-width:900px){#about .intro-grid{grid-template-columns:1fr 1fr}#about .intro-copy{grid-column:2;grid-row:1;font-size:11px}#about .seal{grid-column:1;grid-row:1}}
+@media(max-width:560px){#about .intro-grid{grid-template-columns:1fr}#about .intro-copy{grid-column:1;grid-row:2}#about .seal{grid-column:1;grid-row:1}}
+
+#business .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#business .doc-card{min-height:76px;padding:12px 12px 10px;border-radius:12px;position:relative}
+#business .doc-card h3{font-size:13px;margin:0 0 4px}
+#business .doc-card p{font-size:10px;line-height:1.4}
+#business .doc-card:before{content:"";display:block;float:left;width:25px;height:30px;margin:2px 9px 0 0;border-radius:7px;background:linear-gradient(135deg,#e5f6ed,#fff0e5)}
+#business .doc-card:nth-child(3n+2){background:linear-gradient(135deg,#fff,#fff5ee)}
+#business .doc-card:nth-child(3n){background:linear-gradient(135deg,#f2faf5,#fff)}
+#news{background:transparent}
+#news .news-grid{grid-template-columns:1fr 1fr;gap:9px}
+#news .news-card{padding:12px;border-radius:12px;min-height:104px}
+#news .news-card h3{font-size:13px;margin:4px 0}
+#news .news-card p{font-size:11px;line-height:1.4}
+#news .news-card .tag{font-size:9px}
+#performance .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#performance .doc-card{padding:10px;border-radius:12px;min-height:122px}
+#performance .doc-card:before{content:"";display:block;height:55px;margin:-2px -2px 8px;border-radius:7px;background:linear-gradient(135deg,#cde4f1,#e9f5ed 55%,#f5d9c5)}
+#performance .doc-card:nth-child(3n+2):before{background:linear-gradient(135deg,#d8e7f2,#f4e3d3)}
+#performance .doc-card:nth-child(3n):before{background:linear-gradient(135deg,#d5e8f5,#e3f0e7)}
+#performance .doc-card h3{font-size:12px;line-height:1.35;margin:0 0 4px}
+#performance .doc-card p{font-size:10px;line-height:1.35}
+#history,#directory,#contact{margin-top:22px}
+#history .wrap,#directory .wrap,#contact .wrap{padding:44px 26px}
+footer{background:#103e30}
+@media(max-width:900px){
+ .topbar{height:auto;min-height:60px;flex-wrap:wrap;padding:0 12px 10px;background:#fff}
+ .brand{min-width:100%;height:54px;padding:0 18px;border-radius:0 0 16px 16px}
+ .topbar nav{width:100%;overflow-x:auto;justify-content:flex-start;gap:0}
+ .topbar nav a{padding:7px 10px;font-size:12px}
+ .erp-access{margin:0 0 0 auto}
+ .hero{padding:0}
+ .hero-inner{grid-template-columns:1fr;min-height:0}
+ .hero-copy{padding:24px 7vw 18px}
+ .hero-photo{min-height:190px;clip-path:none}
+ .home-top-grid,.home-bottom-grid{grid-template-columns:1fr;padding:14px 16px 0;gap:12px}
+ #about .seal{min-height:145px}
+ #business .docs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #performance .docs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #news .news-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+ #business .docs-grid,#news .news-grid,#performance .docs-grid{grid-template-columns:1fr 1fr}
+ #business .doc-card{padding:10px}
+ .hero h1{font-size:30px}
+}
+
 </style>
 </head>
 <body>
@@ -101,12 +190,16 @@ footer{background:#103e30;color:#d7e8df}
 <main>
 <section class="hero" id="home">
   <div class="hero-inner">
-    <div class="eyebrow">HYOSHIN · 曉晨</div>
-    <h1>새벽을 여는 마음으로<br>신뢰의 내일을 만듭니다.</h1>
-    <p>주식회사 효신은 성실과 신뢰를 바탕으로 고객과 함께 성장하며 새로운 가치를 만들어갑니다.</p>
-    <div class="hero-actions"><a class="btn gold" href="#about">회사 소개 보기</a><a class="btn ghost" href="#directory">회사 지명원</a></div>
+    <div class="hero-copy">
+      <div class="eyebrow">HYOSHIN · 曉晨</div>
+      <h1>새벽을 여는 마음으로<br>신뢰의 내일을 만듭니다.</h1>
+      <p>주식회사 효신은 성실과 신뢰를 바탕으로 고객과 함께 성장하며<br>부동산 개발부터 분양, 임대, 시설관리까지 종합 서비스를 제공합니다.</p>
+      <div class="hero-actions"><a class="btn gold" href="#about">회사 소개 보기 ›</a><a class="btn ghost" href="#directory">회사 지명원 ›</a></div>
+    </div>
+    <div class="hero-photo" role="img" aria-label="부산 수영만 요트경기장과 마린시티 해안 전경"></div>
   </div>
 </section>
+<div class="home-top-grid">
 <section class="wrap" id="about">
   <div class="section-head"><div class="eyebrow">ABOUT HYOSHIN</div><h2>회사 소개</h2><p>주식회사 효신(曉晨)의 약속과 경영 철학</p></div>
   <div class="intro-grid">
@@ -129,23 +222,13 @@ footer{background:#103e30;color:#d7e8df}
     <article class="doc-card"><h3>부동산매입·매각</h3><p>부동산 매입 및 매각 관련 업무</p></article>
   </div>
 </section>
+</div>
+<div class="home-bottom-grid">
 <section class="paper" id="news">
   <div class="wrap">
     <div class="section-head"><div class="eyebrow">DAILY BRIEFING</div><h2>오늘의 소식</h2><p>방문객 누구나 읽을 수 있는 오늘의 부동산 뉴스</p></div>
     <div class="news-grid" id="publicNews"><article class="news-card"><div class="tag">TODAY'S NEWS</div><h3>뉴스를 불러오는 중입니다.</h3><p>잠시만 기다려 주세요.</p></article></div>
     <p id="newsDate" style="font-size:12px;color:#64748b;margin:12px 0 0"></p>
-  </div>
-</section>
-<section class="wrap" id="history">
-  <div class="section-head"><div class="eyebrow">OUR HISTORY</div><h2>회사 연혁</h2><p>주식회사 효신이 걸어온 길</p></div>
-  <div class="timeline">
-    <div class="event"><b>2014년</b><span>㈜효신씨앤에이 설립(자회사 중 최초 법인 설립일 기준)</span></div>
-    <div class="event"><b>2016년</b><span>㈜효신산업개발 설립</span></div>
-    <div class="event"><b>2019년</b><span>㈜효신피앤씨 설립</span></div>
-    <div class="event"><b>2020년</b><span>㈜에이치에스프롭텍, ㈜혜안씨앤에이 설립</span></div>
-    <div class="event"><b>2021년</b><span>㈜효신글로벌 설립</span></div>
-    <div class="event"><b>2022년</b><span>㈜효신대부, ㈜효신파트너스 설립</span></div>
-    <div class="event"><b>2025년</b><span>㈜효신, ㈜다올파트너스 설립</span></div>
   </div>
 </section>
 <section class="wrap" id="performance">
@@ -159,6 +242,20 @@ footer{background:#103e30;color:#d7e8df}
     <article class="doc-card"><h3>2024 · 창원 롯데캐슬 프리미어</h3><p>경남 창원 · 아파트 분양대행</p></article>
     <article class="doc-card"><h3>2024 · 라포르테블랑 서현</h3><p>경기 성남 · 오피스텔 매입형 분양대행</p></article>
     <article class="doc-card"><h3>2023 · 거제 코아루 파크드림</h3><p>경남 거제 · 아파트 매입형 분양대행</p></article>
+  </div>
+</section>
+</div>
+
+<section class="wrap" id="history">
+  <div class="section-head"><div class="eyebrow">OUR HISTORY</div><h2>회사 연혁</h2><p>주식회사 효신이 걸어온 길</p></div>
+  <div class="timeline">
+    <div class="event"><b>2014년</b><span>㈜효신씨앤에이 설립(자회사 중 최초 법인 설립일 기준)</span></div>
+    <div class="event"><b>2016년</b><span>㈜효신산업개발 설립</span></div>
+    <div class="event"><b>2019년</b><span>㈜효신피앤씨 설립</span></div>
+    <div class="event"><b>2020년</b><span>㈜에이치에스프롭텍, ㈜혜안씨앤에이 설립</span></div>
+    <div class="event"><b>2021년</b><span>㈜효신글로벌 설립</span></div>
+    <div class="event"><b>2022년</b><span>㈜효신대부, ㈜효신파트너스 설립</span></div>
+    <div class="event"><b>2025년</b><span>㈜효신, ㈜다올파트너스 설립</span></div>
   </div>
 </section>
 <section class="paper" id="directory">
