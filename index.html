@@ -59,7 +59,7 @@ ul.alerts li.amber{background:#fffbeb;color:#92400e}
 ul.alerts li.ok{background:#f0fdf4;color:#166534;cursor:default}
 .wr-report-cards{display:grid;gap:10px}.wr-report-card{border:1px solid #e5e7eb;border-radius:10px;padding:12px;background:#fff;display:grid;gap:8px}.wr-report-meta,.wr-report-author{font-size:12px;color:#6b7280}.wr-report-open{border:0;background:transparent;color:#1d4ed8;text-align:left;font:inherit;font-weight:700;padding:4px 0;cursor:pointer;white-space:normal;overflow-wrap:anywhere}.wr-report-open:focus-visible,.wr-report-card .btn:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
 .brief-list{display:grid;gap:10px}.brief-item{padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa}.brief-item a{font-weight:700;color:#1f2937}.brief-item p{margin:5px 0 0;color:#6b7280;font-size:13px}.brief-meta{font-size:11px;color:#9ca3af;margin-top:5px}.idiom-hanja{font-family:'Batang','Noto Serif KR',serif;font-size:28px;letter-spacing:.12em;color:#a77c3b}.idiom-title{font-size:20px;font-weight:700;margin:5px 0;color:#14243c}.idiom-meaning{color:#4b5563;margin:5px 0}.idiom-date{font-size:12px;color:#9ca3af}
-.dashboard-idiom{width:70%;display:grid;grid-template-columns:minmax(130px,.28fr) 1fr;align-items:center;gap:22px;margin:0 auto 20px;padding:22px 28px;border:1px solid #d7c39e;border-radius:14px;background:linear-gradient(110deg,#e5f5ed 0%,#fffdf7 52%,#fde9df 100%);box-shadow:0 3px 12px #1f51300d}.dashboard-idiom-label{font-size:13px;font-weight:800;letter-spacing:.12em;color:#98713b}.dashboard-idiom-label span{display:block;font-size:25px;letter-spacing:0;margin-top:6px;color:#1d5948}.dashboard-idiom-copy .idiom-hanja{font-size:clamp(30px,3vw,42px);color:#1d5948}.dashboard-idiom-copy .idiom-title{display:inline-block;margin:5px 12px 5px 0;padding:5px 14px;border-radius:999px;background:#1d5948;color:#fff;font-size:18px}.dashboard-idiom-copy .idiom-meaning{display:inline;color:#33443d;font-size:15px}.dashboard-idiom-copy .idiom-date{margin-top:7px;color:#75847c}@media(max-width:800px){.dashboard-idiom{width:100%;grid-template-columns:1fr;gap:8px;padding:18px}.dashboard-idiom-copy .idiom-meaning{display:block}}
+.dashboard-idiom{width:70%;display:grid;grid-template-columns:minmax(130px,.28fr) 1fr;align-items:center;gap:22px;margin:0 auto 20px;padding:22px 28px;border:1px solid #d7c39e;border-radius:14px;background:linear-gradient(110deg,#e5f5ed 0%,#fffdf7 52%,#fde9df 100%);box-shadow:0 3px 12px #1f51300d}.dashboard-idiom-head{display:flex;flex-direction:column;gap:12px}.dashboard-idiom-tabs{display:flex;gap:8px;flex-wrap:wrap}.dashboard-idiom-tabs button{border:1px solid #cbded4;background:#fff;color:#315d50;border-radius:999px;padding:8px 13px;font-weight:700;cursor:pointer}.dashboard-idiom-tabs button.active{background:#1d5948;color:#fff;border-color:#1d5948}.wisdom-quote{font-size:clamp(19px,2vw,26px);font-weight:700;line-height:1.55;color:#1d5948}.wisdom-attribution{margin-top:10px;color:#47584f;font-weight:700}.wisdom-attribution span{font-size:12px;color:#839188;font-weight:400;margin-left:8px}.dashboard-idiom-label{font-size:13px;font-weight:800;letter-spacing:.12em;color:#98713b}.dashboard-idiom-label span{display:block;font-size:25px;letter-spacing:0;margin-top:6px;color:#1d5948}.dashboard-idiom-copy .idiom-hanja{font-size:clamp(30px,3vw,42px);color:#1d5948}.dashboard-idiom-copy .idiom-title{display:inline-block;margin:5px 12px 5px 0;padding:5px 14px;border-radius:999px;background:#1d5948;color:#fff;font-size:18px}.dashboard-idiom-copy .idiom-meaning{display:inline;color:#33443d;font-size:15px}.dashboard-idiom-copy .idiom-date{margin-top:7px;color:#75847c}@media(max-width:800px){.dashboard-idiom{width:100%;grid-template-columns:1fr;gap:8px;padding:18px}.dashboard-idiom-copy .idiom-meaning{display:block}}
 /* 메인 통합검색 + 파일 끌어놓기 */
 .search-hero{background:white;border-radius:14px;padding:20px;box-shadow:0 1px 4px #0001;margin-bottom:20px;border:2px dashed transparent;transition:border-color .15s,background .15s}
 .search-hero.dragging{border-color:#2563eb;background:#eff6ff}
@@ -101,7 +101,7 @@ tr.editing td{background:#eff6ff}
     <div id="searchResults"></div>
     <div id="sortResult"></div>
   </div>
-  <div class="dashboard-idiom" aria-label="오늘의 사자성어"><div class="dashboard-idiom-label">오늘의 사자성어<span>매일의 마음가짐</span></div><div class="dashboard-idiom-copy" id="dashboardIdiom"><p class="muted">오늘의 사자성어를 준비하고 있습니다.</p></div></div>
+  <div class="dashboard-idiom" aria-label="오늘의 사자성어와 위대한 명언"><div class="dashboard-idiom-head"><div class="dashboard-idiom-label">오늘의 마음 한 줄<span>매일 새롭게</span></div><div class="dashboard-idiom-tabs"><button type="button" class="active" id="idiomTab" onclick="showDailyWisdom('idiom')">📖 오늘의 사자성어</button><button type="button" id="quoteTab" onclick="showDailyWisdom('quote')">❝ 오늘의 명언</button></div></div><div class="dashboard-idiom-copy" id="dashboardIdiom"><p class="muted">오늘의 콘텐츠를 준비하고 있습니다.</p></div></div>
   <div class="cards" id="kpis"></div>
   <div class="grid2">
     <div class="panel"><h3>🔴 대표이사 확인사항</h3><ul class="alerts" id="alerts"></ul></div>
@@ -307,9 +307,49 @@ function exportCsv(key){
 }
 
 /* ================= 대시보드 ================= */
-function renderDailyIdiom(){
-  $('dashboardIdiom').innerHTML='<div class="idiom-hanja">有志竟成</div><div class="idiom-title">유지경성</div><p class="idiom-meaning">뜻이 있어 굳게 마음먹으면 마침내 이룬다는 뜻입니다.</p><div class="idiom-date">오늘의 업무를 시작하며 함께 되새기는 말</div>';
+const dailyIdioms=[
+  {hanja:'有志竟成',title:'유지경성',meaning:'뜻이 있어 굳게 마음먹으면 마침내 이룬다는 뜻입니다.'},
+  {hanja:'厚積薄發',title:'후적박발',meaning:'실력을 충분히 쌓은 뒤 때가 되면 크게 펼친다는 뜻입니다.'},
+  {hanja:'愚公移山',title:'우공이산',meaning:'어떤 일이든 끈기 있게 노력하면 끝내 이룰 수 있다는 뜻입니다.'},
+  {hanja:'切磋琢磨',title:'절차탁마',meaning:'학문과 인격을 끊임없이 갈고닦는다는 뜻입니다.'},
+  {hanja:'日新又日新',title:'일신우일신',meaning:'날마다 새롭게 발전하고 거듭난다는 뜻입니다.'},
+  {hanja:'百折不屈',title:'백절불굴',meaning:'여러 번 꺾여도 굽히지 않고 뜻을 지킨다는 뜻입니다.'},
+  {hanja:'積小成大',title:'적소성대',meaning:'작은 것을 쌓아 큰 성과를 이룬다는 뜻입니다.'},
+  {hanja:'同心協力',title:'동심협력',meaning:'한마음으로 힘을 합쳐 함께 노력한다는 뜻입니다.'},
+  {hanja:'先行後言',title:'선행후언',meaning:'말보다 행동을 먼저 하고 실천으로 보여준다는 뜻입니다.'},
+  {hanja:'自强不息',title:'자강불식',meaning:'스스로 힘쓰고 쉬지 않고 꾸준히 노력한다는 뜻입니다.'}
+];
+const dailyQuotes=[
+  {quote:'배우고 때때로 익히면 또한 기쁘지 아니한가.',person:'공자',source:'논어'},
+  {quote:'천 리 길도 한 걸음부터 시작된다.',person:'노자',source:'도덕경 제64장'},
+  {quote:'나는 생각한다. 그러므로 존재한다.',person:'르네 데카르트',source:'방법서설'},
+  {quote:'아는 것이 곧 힘이다.',person:'프랜시스 베이컨',source:'명상록(Meditationes Sacrae)'},
+  {quote:'큰일을 이루려면 먼저 작은 일부터 시작해야 한다.',person:'노자',source:'도덕경의 뜻을 옮긴 문장'},
+  {quote:'배움에는 끝이 없고, 익힘에는 쉼이 없다.',person:'동양 고전의 배움 정신',source:'고전의 뜻을 요약한 문장'},
+  {quote:'뜻을 세우고 꾸준히 실천하는 것이 성장의 바탕이다.',person:'효신통합관리 오늘의 문장',source:'자체 선정 문장'}
+];
+let dailyWisdomMode='idiom';
+function getKoreanDateKey(){
+  const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const v=Object.fromEntries(p.map(x=>[x.type,x.value]));
+  return Number(v.year+v.month+v.day);
 }
+function showDailyWisdom(mode){
+  dailyWisdomMode=mode==='quote'?'quote':'idiom';
+  const day=getKoreanDateKey();
+  const box=$('dashboardIdiom');
+  const idiomTab=$('idiomTab'),quoteTab=$('quoteTab');
+  if(idiomTab) idiomTab.classList.toggle('active',dailyWisdomMode==='idiom');
+  if(quoteTab) quoteTab.classList.toggle('active',dailyWisdomMode==='quote');
+  if(dailyWisdomMode==='quote'){
+    const q=dailyQuotes[(day-1)%dailyQuotes.length];
+    box.innerHTML='<div class="wisdom-quote">“'+q.quote+'”</div><div class="wisdom-attribution">— '+q.person+' <span>'+q.source+'</span></div><div class="idiom-date">오늘의 명언 · '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'long',day:'numeric'}).format(new Date())+'</div>';
+  }else{
+    const x=dailyIdioms[(day-1)%dailyIdioms.length];
+    box.innerHTML='<div class="idiom-hanja">'+x.hanja+'</div><div class="idiom-title">'+x.title+'</div><p class="idiom-meaning">'+x.meaning+'</p><div class="idiom-date">오늘의 사자성어 · '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'long',day:'numeric'}).format(new Date())+'</div>';
+  }
+}
+function renderDailyIdiom(){showDailyWisdom('idiom');}
 async function loadDashboardNews(){
   const box=$('dashboardNews');
   try{
