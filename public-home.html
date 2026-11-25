@@ -122,7 +122,14 @@ footer{background:#103e30;color:#d7e8df}
 #about .seal-mark .hanja{font-size:46px}
 #about .seal-mark strong{font-size:17px}
 #about .seal-mark small{font-size:11px}
-#about .seal:after{content:"신뢰로 가치를 만들고, 고객과 함께 성장하는 효신";font-size:17px;line-height:1.4;font-weight:800;color:#14543f;max-width:230px}
+#about .intro-grid{grid-template-columns:.95fr 1.05fr;gap:16px;align-items:center}
+#about .intro-copy{display:block;grid-column:2;grid-row:1;font-size:12px;line-height:1.5}
+#about .intro-copy p{margin:0 0 7px}
+#about .seal{grid-column:1;grid-row:1}
+#about .seal:before,#about .seal:after{content:none}
+@media(max-width:900px){#about .intro-grid{grid-template-columns:1fr 1fr}#about .intro-copy{grid-column:2;grid-row:1;font-size:11px}#about .seal{grid-column:1;grid-row:1}}
+@media(max-width:560px){#about .intro-grid{grid-template-columns:1fr}#about .intro-copy{grid-column:1;grid-row:2}#about .seal{grid-column:1;grid-row:1}}
+
 #business .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 #business .doc-card{min-height:76px;padding:12px 12px 10px;border-radius:12px;position:relative}
 #business .doc-card h3{font-size:13px;margin:0 0 4px}
