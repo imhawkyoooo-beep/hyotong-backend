@@ -425,7 +425,7 @@ const server=http.createServer((req,res)=>{
   const file=path.resolve(ROOT,requested);
   const blocked=[DB_FILE,AUTH_FILE].includes(file)||[UPLOAD_DIR,BACKUP_DIR,REPORTS_DIR,NEWS_DIR].some(d=>file.startsWith(d+path.sep))||/\.(js|ps1|bat|json|tmp)$/i.test(file);
   if(!file.startsWith(ROOT+path.sep)||blocked||!fs.existsSync(file)||!fs.statSync(file).isFile())return send(res,404,'Not Found');
-  const ext=path.extname(file).toLowerCase();const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon'};
+  const ext=path.extname(file).toLowerCase();const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webp':'image/webp','.ico':'image/x-icon'};
   res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','Cache-Control':'no-store'});if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);
 });
 server.on('error',err=>{
