@@ -221,7 +221,7 @@ const server=http.createServer((req,res)=>{
       if(!validUsername(username)) return sendJson(res,400,{ok:false,error:'아이디는 영문·숫자·._- 조합 3~20자로 입력하세요.'});
       if(!validPassword(password)) return sendJson(res,400,{ok:false,error:'비밀번호는 12~128자로 입력하세요.'});
       if(isAdminName(username)||findStaff(username)) return sendJson(res,409,{ok:false,error:'이미 사용 중인 아이디입니다.'});
-      if(staffCount()>=10) return sendJson(res,403,{ok:false,error:'직원 계정은 대표자 외 최대 10명까지 신청할 수 있습니다.'});
+      if(staffCount()>=30) return sendJson(res,403,{ok:false,error:'직원 계정은 대표자 외 최대 30명까지 신청할 수 있습니다.'});
       const salt=crypto.randomBytes(16).toString('hex');
       const user={username,salt,hash:hashPassword(password,salt),status:'pending',role:'staff',permissions:[],createdAt:new Date().toISOString()};
       staffUsers.push(user); saveUsers(); addAudit('system','signup_pending',username,'직원 가입 신청');
@@ -255,7 +255,7 @@ const server=http.createServer((req,res)=>{
   }
   if(url.pathname==='/api/admin/users' && req.method==='GET'){
     const admin=requireAdmin(req,res); if(!admin)return;
-    return sendJson(res,200,{ok:true,users:staffUsers.map(publicUser),limit:10,used:staffCount()});
+    return sendJson(res,200,{ok:true,users:staffUsers.map(publicUser),limit:30,used:staffCount()});
   }
   if(url.pathname==='/api/admin/audit' && req.method==='GET'){
     const admin=requireAdmin(req,res); if(!admin)return;
