@@ -6,145 +6,94 @@
 <meta name="description" content="주식회사 효신(曉晨) 공식 홈페이지. 회사 개요, 부동산개발·분양대행·광고대행·시설관리·임대관리, 주요 업무실적 및 회사 지명원.">
 <title>주식회사 효신(曉晨) | 공식 홈페이지</title>
 <style>
-:root{--navy:#14243c;--navy2:#203b5e;--gold:#c49a55;--ink:#243247;--muted:#64748b;--paper:#f7f5f0;--line:#e5e0d7}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif;background:#fff;line-height:1.65}
-a{color:inherit;text-decoration:none}.topbar{background:var(--navy);color:#fff;padding:18px 5vw;display:flex;justify-content:space-between;align-items:center;gap:20px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px #0c193022}
-.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}.brand strong{font-size:clamp(20px,2.2vw,29px);letter-spacing:-.06em}.brand .hanja{font-family:"Batang","Noto Serif KR",serif;color:#e4c58e;font-size:.9em;margin-left:4px}.brand small{font-size:12px;color:#d2d8e2;letter-spacing:.04em}
-nav{display:flex;gap:clamp(10px,2vw,26px);font-size:14px;flex-wrap:wrap;margin-left:auto}nav a{color:#e8edf5}nav a:hover{color:#e4c58e}.erp-access{font-size:13.2px;color:#e5c58e;white-space:nowrap;letter-spacing:.03em;margin-left:24px}
-.hero{min-height:320px;padding:40px 7vw 34px;background:linear-gradient(115deg,#14243cf5,#203b5edc),radial-gradient(circle at 80% 25%,#c49a55 0,transparent 32%);color:#fff;display:flex;align-items:center}.hero-inner{max-width:1180px;margin:auto;width:100%}.eyebrow{color:#e4c58e;letter-spacing:.22em;font-size:12px;font-weight:700}.hero h1{font-size:clamp(36px,6vw,66px);line-height:1.17;letter-spacing:-.055em;margin:12px 0 14px;max-width:860px}.hero p{font-size:clamp(15px,1.8vw,19px);color:#dbe4f0;max-width:720px;margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.btn{display:inline-block;padding:12px 20px;border-radius:5px;border:1px solid #d7bd8b;font-weight:700;font-size:14px}.btn.gold{background:#c49a55;color:#17263b;border-color:#c49a55}.btn.ghost{color:white;border-color:#9cacc0}
-.wrap{max-width:1180px;margin:auto;padding:78px 26px}.section-head{margin-bottom:28px}.section-head .eyebrow{color:#a77c3b}.section-head h2{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.05em;margin:8px 0}.section-head p{color:var(--muted);margin:0}
-.intro-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}.intro-copy{font-size:16px;color:#465367}.intro-copy strong{color:var(--navy)}.seal{min-height:270px;background:linear-gradient(145deg,#f6f2e9,#e9e1d1);display:grid;place-items:center;border:1px solid #e2d8c7;border-radius:8px}.seal-mark{text-align:center;color:var(--navy)}.seal-mark .hanja{font-family:"Batang","Noto Serif KR",serif;font-size:68px;letter-spacing:.16em;color:#a77c3b}.seal-mark strong{display:block;font-size:19px;letter-spacing:.12em}
-.paper{background:var(--paper)}.news-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.news-card{background:#fff;border:1px solid var(--line);border-radius:7px;padding:22px;min-height:160px}.news-card .tag{color:#a77c3b;font-size:11px;letter-spacing:.12em;font-weight:700}.news-card h3{margin:8px 0;font-size:19px;color:var(--navy)}.news-card p{margin:0;color:var(--muted);font-size:14px}
-.saying{background:var(--navy);color:white;padding:32px;border-radius:8px;margin-bottom:18px}.saying .hanja{font-family:"Batang","Noto Serif KR",serif;color:#e5c58e;font-size:25px;letter-spacing:.1em}.saying h3{font-size:21px;margin:8px 0}.saying p{margin:0;color:#d4deea}
-.timeline{border-left:2px solid #d7c39e;margin-left:10px;padding-left:28px}.event{position:relative;margin:0 0 25px}.event:before{content:"";position:absolute;left:-36px;top:8px;width:13px;height:13px;border-radius:50%;background:var(--gold);border:3px solid #fff;box-shadow:0 0 0 1px var(--gold)}.event b{color:#a77c3b;margin-right:14px}
-.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.doc-card{border:1px solid var(--line);padding:24px;border-radius:7px;background:#fff}.doc-card h3{margin:0 0 8px;color:var(--navy)}.doc-card p{margin:0;color:var(--muted);font-size:14px}.doc-card a{display:inline-block;margin-top:16px;color:#9a7136;font-weight:700;font-size:13px}
-.contact{background:var(--navy2);color:#fff}.contact .section-head p{color:#d4deea}.contact-line{border-top:1px solid #ffffff33;padding:17px 0;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.contact-line span:first-child{color:#e5c58e}
-footer{background:#101d30;color:#c4ccd7;padding:28px 5vw;font-size:12px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}nav{margin-left:0}.erp-access{margin-left:0}.hero{min-height:300px;padding:32px 7vw}.intro-grid,.news-grid{grid-template-columns:1fr}.docs-grid{grid-template-columns:1fr}.wrap{padding:56px 20px}}
-
-/* ===== 효신통합관리와 통일된 민트·살구빛 공식 홈페이지 디자인 ===== */
-:root{--navy:#14543f;--navy2:#1b6a50;--gold:#c69a54;--ink:#20382e;--muted:#718078;--paper:#f4faf6;--line:#dce9e2;--mint:#e9f6ef;--peach:#fff0e6}
-html{scroll-padding-top:88px}
-body{background:#f8fbf9;color:var(--ink)}
-.topbar{min-height:72px;padding:10px 3.5vw;background:linear-gradient(100deg,#10543f 0,#17664d 28%,#fff 28%,#fff 100%);color:#183d30;border-bottom:1px solid var(--line);box-shadow:0 3px 14px #164b3510;gap:18px}
-.brand{align-items:center;min-width:max-content}.brand strong{color:#fff;font-size:clamp(18px,2vw,25px)}.brand .hanja{color:#e8c98e}
-.topbar nav{gap:clamp(9px,1.4vw,20px);font-weight:700;font-size:13px}
-.topbar nav a{color:#294d3d}.topbar nav a:hover{color:#168057}
-.erp-access{margin-left:8px;padding:9px 14px;border-radius:999px;background:var(--navy2);color:#fff;font-weight:700;font-size:13px;letter-spacing:0}
-.hero{min-height:320px;padding:42px 6vw 38px;background:radial-gradient(ellipse at 82% 15%,#fff3dc 0,transparent 34%),linear-gradient(110deg,#e5f5ec 0%,#fffdf6 52%,#ffece1 100%);color:var(--ink);position:relative;overflow:hidden;border-bottom:1px solid #e3eee7}
-.hero:after{content:"";position:absolute;right:-5%;bottom:-85px;width:58%;height:180px;border-radius:50% 0 0 0;background:linear-gradient(135deg,#ccebddaa,#e8f6ed00);pointer-events:none}
-.hero-inner{position:relative;z-index:1;max-width:1180px}
-.eyebrow{color:#a77c3b;letter-spacing:.2em}
-.hero h1{color:#14543f;font-size:clamp(36px,5.2vw,62px);line-height:1.15;margin:12px 0 15px;max-width:850px}
-.hero p{color:#53685d;font-size:clamp(15px,1.7vw,18px);max-width:740px}
-.btn{border-radius:999px;padding:11px 20px;transition:transform .15s,box-shadow .15s}
-.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px #174d3618}
-.btn.gold{background:#17664d;color:#fff;border-color:#17664d}
-.btn.ghost{color:#17664d;border:1px solid #8bbba2;background:#ffffffc9}
-.wrap{max-width:1240px;padding:64px 26px}
-.section-head .eyebrow{color:#a77c3b}
-.section-head h2{color:#14543f}
-.section-head p{color:#718078}
-.intro-grid{gap:34px}
-.intro-copy{color:#53665c}
-.intro-copy strong{color:#14543f}
-.seal{min-height:250px;border:1px solid #ead8bb;border-radius:15px;background:linear-gradient(135deg,#f7f3e9,#fffaf0 55%,#f8e9dc);box-shadow:0 4px 16px #315a4210}
-.seal-mark{color:#14543f}.seal-mark .hanja{color:#b1843e}
-.paper{background:linear-gradient(110deg,#f0f8f3,#fffaf6)}
-.news-grid{gap:16px}
-.news-card{border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px #174d360c;min-height:150px}
-.news-card:nth-child(even){background:#fffaf6}
-.news-card .tag{color:#a77c3b}
-.news-card h3{color:#14543f}
-.saying{background:linear-gradient(110deg,#17664d,#104b3a);border-radius:15px;box-shadow:0 4px 14px #174d3618}
-.saying .hanja{color:#f0d5a0}
-.timeline{border-left-color:#b8d9c6}
-.event:before{background:#1d805d;box-shadow:0 0 0 1px #1d805d}
-.event b{color:#a77c3b}
-.docs-grid{gap:14px}
-.doc-card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#fff,#f3faf6);box-shadow:0 3px 12px #174d360b;transition:transform .15s,box-shadow .15s}
-.doc-card:nth-child(even){background:linear-gradient(145deg,#fff,#fff4ed)}
-.doc-card:hover{transform:translateY(-2px);box-shadow:0 7px 18px #174d3618}
-.doc-card h3{color:#14543f}
-.doc-card p{color:#718078}
-.doc-card a{color:#17664d}
-.contact{background:linear-gradient(110deg,#17664d,#104b3a)}
-.contact .section-head p{color:#e0eee6}
-.contact-line{border-top-color:#ffffff44}
-.contact-line span:first-child{color:#f0d5a0}
-footer{background:#103e30;color:#d7e8df}
-@media(max-width:760px){
- .topbar{background:#14543f;align-items:flex-start;flex-direction:column;padding:12px 18px;gap:10px}
- .brand strong{color:#fff}
- .topbar nav{margin:0;gap:8px 14px}
- .topbar nav a{color:#edf7f1}
- .erp-access{margin:0;background:#fff;color:#14543f}
- .hero{min-height:290px;padding:32px 7vw}
- .hero h1{font-size:clamp(34px,8vw,46px)}
- .wrap{padding:48px 18px}
- .intro-grid,.news-grid{grid-template-columns:1fr}
- .docs-grid{grid-template-columns:1fr}
-}
-
-
-
-/* Final reference-matched homepage: keep the supplied composition, replace only the hero photograph */
-.topbar{height:60px;min-height:60px;padding:0 2.4vw 0 0;background:#fff;display:flex;align-items:center;gap:16px;border-bottom:1px solid #dfe9e3}
-.brand{height:60px;min-width:335px;padding:0 24px 0 4.5vw;background:linear-gradient(100deg,#10543f,#17664d);border-radius:0 0 28px 0;display:flex;align-items:center;gap:12px}
+:root{--green:#126044;--green2:#087b50;--ink:#173d2d;--muted:#63756c;--line:#dfe8e3;--mint:#edf7f2;--peach:#fff3e9}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif;line-height:1.45}
+a{color:inherit;text-decoration:none}
+.topbar{height:60px;min-height:60px;padding:0 2.4vw 0 0;background:#fff;display:flex;align-items:center;gap:20px;border-bottom:1px solid #e3e9e5;position:sticky;top:0;z-index:20}
+.brand{height:60px;min-width:335px;padding:0 24px 0 4.5vw;background:linear-gradient(100deg,#07583d,#14734f);border-radius:0 0 28px 0;display:flex;align-items:center;gap:12px}
 .brand:before{content:"▦";font-size:27px;color:#fff}
-.brand strong{color:#fff;font-size:clamp(18px,2vw,25px)}
+.brand strong{color:#fff;font-size:clamp(18px,2vw,25px);letter-spacing:-.05em}
+.brand .hanja{color:#e9c37b;font-size:.9em}
 .topbar nav{display:flex;align-items:center;justify-content:center;gap:0;flex:1;margin:0;white-space:nowrap}
-.topbar nav a{color:#182b23;font-weight:700;font-size:13px;padding:0 15px;border-right:1px solid #d8e1dc}
+.topbar nav a{color:#182b23;font-weight:700;font-size:13px;padding:0 16px;border-right:1px solid #d7dfda}
 .topbar nav a:last-child{border:0}
-.erp-access{margin:0 0 0 auto;background:#17664d;color:#fff;border-radius:999px;padding:8px 17px;white-space:nowrap;box-shadow:0 2px 7px #17664d22}
-.hero{height:208px;min-height:208px;padding:0 0 0 7vw;background:linear-gradient(105deg,#f1f8f3,#fffaf2);border-bottom:0;overflow:hidden}
-.hero-inner{max-width:none;width:100%;height:208px;min-height:208px;margin:0;display:grid;grid-template-columns:43% 57%;align-items:stretch;gap:0}
-.hero-copy{align-self:center;padding:12px 18px 14px 0;position:relative;z-index:2}
-.hero-copy:before{content:"";position:absolute;left:-28px;top:4px;bottom:8px;width:3px;border-radius:3px;background:#24966b}
+.topbar nav a:nth-child(2):after{content:"⌄";padding-left:7px;color:#52675b}
+.erp-access{margin:0 0 0 auto;background:#087449;color:#fff;border-radius:999px;padding:8px 17px;white-space:nowrap;font-weight:700;font-size:13px;box-shadow:0 2px 7px #17664d22}
+.hero{height:208px;min-height:208px;padding:0 0 0 7vw;background:linear-gradient(100deg,#f4faf6 0%,#fffaf1 48%,#eff8f6 100%);overflow:hidden;position:relative}
+.hero-inner{height:208px;min-height:208px;max-width:none;width:100%;margin:0;display:grid;grid-template-columns:43% 57%;align-items:stretch;gap:0}
+.hero-copy{align-self:center;padding:8px 18px 10px 0;position:relative;z-index:2}
+.hero-copy:before{content:"";position:absolute;left:-29px;top:0;bottom:0;width:3px;background:#16875c}
 .hero .eyebrow{display:none}
-.hero h1{font-size:clamp(30px,3.25vw,42px);line-height:1.16;margin:0 0 8px;color:#104b37;letter-spacing:-.05em}
-.hero p{font-size:13px;line-height:1.5;color:#42594d;margin:0;max-width:520px}
-.hero-actions{margin-top:11px;gap:10px}
-.hero .btn{padding:7px 17px;font-size:12px}
-.hero .btn.gold{background:#17664d;color:#fff}
-.hero .btn.ghost{background:#fff;color:#17664d;border-color:#17664d}
-.hero-photo{height:208px;min-height:208px;background-image:url("https://access.visitkorea.or.kr/bfvk_img/call?cmd=VIEW&id=a6617688-bd88-4d08-bd31-2716308dfb62");background-position:center 54%;background-size:cover;clip-path:ellipse(100% 96% at 66% 50%);position:relative}
-.hero-photo:after{content:"";position:absolute;inset:auto 0 0;height:17px;background:linear-gradient(90deg,#ccebdd,#e8f6edaa);opacity:.85}
-.home-top-grid,.home-bottom-grid{max-width:1240px;margin:0 auto;padding:10px 22px 0;display:grid;grid-template-columns:1fr 1.08fr;gap:26px;align-items:start}
-.home-top-grid>.wrap,.home-bottom-grid>.wrap,.home-bottom-grid>.paper{margin:0;max-width:none;width:100%;padding:7px 0 3px;background:transparent}
-.home-top-grid .section-head,.home-bottom-grid .section-head{margin-bottom:9px}
-.home-top-grid .section-head .eyebrow,.home-bottom-grid .section-head .eyebrow{display:none}
-.home-top-grid .section-head h2,.home-bottom-grid .section-head h2{font-size:21px;margin:0 0 4px;color:#14543f}
-.home-top-grid .section-head p,.home-bottom-grid .section-head p{display:none}
-#about .intro-grid{grid-template-columns:.95fr 1.05fr;gap:16px;align-items:center}
-#about .intro-copy{display:block;grid-column:2;grid-row:1;font-size:12px;line-height:1.45}
+.hero h1{font-size:clamp(30px,3.25vw,42px);line-height:1.16;margin:0 0 9px;color:#104b37;letter-spacing:-.055em;max-width:510px}
+.hero p{font-size:13px;line-height:1.5;color:#344b40;margin:0;max-width:520px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:7px 18px;border-radius:999px;border:1px solid #17664d;font-weight:700;font-size:12px}
+.btn.gold{background:#087449;color:#fff;border-color:#087449}
+.btn.ghost{background:#fff;color:#17664d;border-color:#17664d}
+.hero-photo{height:208px;min-height:208px;background-image:url("https://access.visitkorea.or.kr/bfvk_img/call?cmd=VIEW&id=a6617688-bd88-4d08-bd31-2716308dfb62");background-position:center 52%;background-size:cover;clip-path:ellipse(100% 96% at 66% 50%);position:relative}
+.hero-photo:after{content:"";position:absolute;inset:auto 0 0;height:17px;background:linear-gradient(90deg,#cdebdc,#e7f6edaa)}
+.home-top-grid,.home-bottom-grid{max-width:1219px;margin:0 auto;padding:10px 43px 0;display:grid;grid-template-columns:1fr 1.08fr;gap:38px;align-items:start}
+.home-bottom-grid{padding-top:8px}
+.home-top-grid>.wrap,.home-bottom-grid>.wrap,.home-bottom-grid>.paper{margin:0;max-width:none;width:100%;padding:4px 0 0;background:transparent}
+.section-head{margin:0 0 9px}
+.section-head .eyebrow{display:none}
+.section-head h2{font-size:21px;line-height:1.25;margin:0;color:#104b37;font-weight:800;letter-spacing:-.04em}
+.section-head h2:before{content:"▦";font-size:20px;margin-right:12px;color:#087449}
+.section-head p{display:none}
+#about .intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center;border:1px solid #f0dfc6;border-radius:13px;background:linear-gradient(110deg,#fffaf1,#fff7ef);padding:13px 17px;min-height:167px}
+#about .seal{min-height:130px;border:0;border-radius:0;background:transparent;display:grid;place-items:center;padding:0}
+#about .seal-mark{text-align:center;color:#104b37}
+#about .seal-mark .hanja{font-family:"Batang","Noto Serif KR",serif;font-size:46px;letter-spacing:.12em;color:#bd8a31;white-space:nowrap}
+#about .seal-mark strong{display:block;font-size:17px;letter-spacing:0;margin-top:5px}
+#about .seal-mark small{display:block;font-size:10px;margin-top:3px;color:#52685c}
+#about .intro-copy{font-size:11px;line-height:1.48;color:#334b3e}
 #about .intro-copy p{margin:0 0 6px}
-#about .seal{grid-column:1;grid-row:1;min-height:166px;padding:12px;display:grid;place-items:center;background:linear-gradient(110deg,#fff9ee,#fff5ed);border-color:#f0dfc5;border-radius:13px}
-#about .seal-mark .hanja{font-size:46px}
-#about .seal-mark strong{font-size:17px}
-#about .seal-mark small{font-size:11px}
-#business .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-#business .doc-card{min-height:76px;padding:11px 9px 9px;border-radius:12px;position:relative}
-#business .doc-card h3{font-size:13px;margin:0 0 4px}
-#business .doc-card p{font-size:10px;line-height:1.35}
-#business .doc-card:before{content:"◇";display:block;float:left;width:25px;height:30px;margin:0 7px 0 0;color:#15965f;font-size:25px;line-height:28px}
-#business .doc-card:nth-child(2):before,#business .doc-card:nth-child(5):before{color:#f08a00}
+#about .intro-copy p:first-child:before{content:"신뢰로 가치를 만들고, 고객과 함께 성장하는 효신";display:block;font-size:16px;line-height:1.35;font-weight:800;color:#14543f;margin-bottom:7px}
+#about .intro-copy p:first-child{font-size:0}
+#about .intro-copy p:first-child strong{font-size:0}
+#about .intro-copy p:last-child{display:none}
+#about .intro-copy:after{content:"회사소개 상세보기  ›";display:inline-block;border:1px solid #17664d;border-radius:999px;color:#17664d;background:#fff;padding:4px 14px;font-size:10px;font-weight:700;margin-top:4px}
+#business .docs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#business .doc-card{min-height:76px;padding:11px 9px;border:0;border-radius:12px;background:#eef8f3;box-shadow:none;position:relative}
+#business .doc-card:nth-child(2),#business .doc-card:nth-child(4),#business .doc-card:nth-child(6){background:#fff4e9}
+#business .doc-card h3{font-size:13px;line-height:1.25;margin:0 0 5px 36px;color:#172b21}
+#business .doc-card p{font-size:9px;line-height:1.35;margin-left:36px;color:#405248}
+#business .doc-card:before{position:absolute;left:12px;top:16px;font-size:24px;line-height:1;color:#078b55}
+#business .doc-card:nth-child(1):before{content:"▥"}
+#business .doc-card:nth-child(2):before{content:"▱";color:#ed8500}
+#business .doc-card:nth-child(3):before{content:"♧"}
+#business .doc-card:nth-child(4):before{content:"⚙";color:#ed8500}
+#business .doc-card:nth-child(5):before{content:"⚿"}
+#business .doc-card:nth-child(6):before{content:"♧";color:#ed8500}
+#business .doc-card a{display:none}
 #news{background:transparent}
-#news .wrap{padding:7px 0 3px}
-#news .news-grid{grid-template-columns:1fr 1fr;gap:9px}
-#news .news-card{padding:12px;border-radius:12px;min-height:104px}
-#news .news-card h3{font-size:13px;margin:4px 0;color:#183c2e}
-#news .news-card p{font-size:11px;line-height:1.4}
-#news .news-card .tag{font-size:9px}
-#performance .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-#performance .doc-card{padding:9px;border-radius:12px;min-height:122px}
-#performance .doc-card:before{content:"";display:block;height:55px;margin:-1px -1px 7px;border-radius:7px;background:linear-gradient(135deg,#cde4f1,#e9f5ed 55%,#f5d9c5)}
-#performance .doc-card:nth-child(2):before{background:linear-gradient(135deg,#d8e7f2,#f4e3d3)}
-#performance .doc-card:nth-child(3):before{background:linear-gradient(135deg,#d5e8f5,#e3f0e7)}
-#performance .doc-card h3{font-size:12px;line-height:1.35;margin:0 0 4px}
-#performance .doc-card p{font-size:10px;line-height:1.35}
+#news .wrap{padding:0}
+#news .section-head h2:before{content:"⚑"}
+#news .news-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#news .news-card{display:grid;grid-template-columns:80px 1fr;grid-template-rows:auto auto 1fr;column-gap:10px;align-content:start;min-height:137px;padding:10px;border:1px solid #e0e7e3;border-radius:12px;background:#fff;box-shadow:0 1px 3px #173d2d12;position:relative}
+#news .news-card:before{content:"";grid-column:1;grid-row:1/4;width:80px;height:104px;border-radius:7px;background-image:url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=240&auto=format&fit=crop");background-size:cover;background-position:center}
+#news .news-card:nth-child(2):before{background-image:url("https://static.thairath.co.th/media/dFQROr7oWzulq5Fa6rMjLCDW2CLoTDCHDY8X9rBDhunbhtCh512ysBMTDc60o8xCb1p.jpg")}
+#news .news-card .tag{grid-column:2;grid-row:1;display:inline-block;background:#2b8060;color:#fff;border-radius:99px;padding:2px 9px;font-size:9px;letter-spacing:0;font-weight:700;width:max-content}
+#news .news-card h3{grid-column:2;grid-row:2;font-size:12px;line-height:1.3;margin:5px 0 4px;color:#182e23}
+#news .news-card p{grid-column:2;grid-row:3;font-size:10px;line-height:1.4;margin:0;color:#4f5d55}
+#news .news-card small{grid-column:2;grid-row:4;font-size:9px!important;margin-top:4px!important;color:#78877f!important}
+#performance .section-head h2:before{content:"▱"}
+#performance .section-head h2 small{font-size:13px;font-weight:600}
+#performance .docs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#performance .doc-card{padding:7px;border:1px solid #e0e7e3;border-radius:12px;min-height:140px;background:#fff;box-shadow:0 1px 3px #173d2d12}
+#performance .doc-card:before{content:"";display:block;height:77px;margin:0 0 7px;border-radius:7px;background-size:cover;background-position:center;background-image:url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=420&auto=format&fit=crop")}
+#performance .doc-card:nth-child(2):before{background-image:url("https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=420&auto=format&fit=crop")}
+#performance .doc-card:nth-child(3):before{background-image:url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=420&auto=format&fit=crop")}
+#performance .doc-card h3{font-size:12px;line-height:1.3;margin:0 0 4px;color:#172f23}
+#performance .doc-card p{font-size:10px;line-height:1.3;margin:0;color:#56665d}
+#performance .doc-card a{display:none}
 #history,#directory,#contact{margin-top:22px}
-#history .wrap,#directory .wrap,#contact .wrap{padding:44px 26px}
+#history .wrap,#directory .wrap,#contact .wrap{max-width:1180px;padding:44px 26px}
+.paper#directory{background:#f5faf7}
+.contact{background:#14543f}
+footer{background:#103e30}
 @media(max-width:900px){
  .topbar{height:auto;min-height:60px;flex-wrap:wrap;padding:0 12px 10px;background:#fff}
  .brand{min-width:100%;height:54px;padding:0 18px;border-radius:0 0 16px 16px}
@@ -155,19 +104,21 @@ footer{background:#103e30;color:#d7e8df}
  .hero-inner{height:auto;grid-template-columns:1fr;min-height:0}
  .hero-copy{padding:24px 7vw 18px}
  .hero-photo{height:190px;min-height:190px;clip-path:none}
- .home-top-grid,.home-bottom-grid{grid-template-columns:1fr;padding:14px 16px 0;gap:12px}
- #business .docs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- #performance .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .home-top-grid,.home-bottom-grid{grid-template-columns:1fr;padding:14px 16px 0;gap:16px}
+ #about .intro-grid{min-height:150px}
+ #business .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:560px){
- #about .intro-grid{grid-template-columns:1fr}
- #about .intro-copy{grid-column:1;grid-row:2}
- #about .seal{grid-column:1;grid-row:1}
- #business .docs-grid,#news .news-grid{grid-template-columns:1fr 1fr}
- #performance .docs-grid{grid-template-columns:1fr 1fr}
+ #about .intro-grid{grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+ #about .seal-mark .hanja{font-size:32px}
+ #about .seal-mark strong{font-size:13px}
+ #about .intro-copy{font-size:10px}
+ #business .docs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #news .news-grid{grid-template-columns:1fr}
+ #performance .docs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #performance .doc-card:before{height:55px}
  .hero h1{font-size:30px}
 }
-
 </style>
 </head>
 <body>
