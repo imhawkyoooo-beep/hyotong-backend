@@ -313,11 +313,30 @@ async function loadReports(){try{const q=new URLSearchParams();if($('wrFilter').
 async function viewReport(id){try{const d=await wrApi('/api/reports/'+encodeURIComponent(id));const r=d.report;$('wrDetail').hidden=false;$('wrDetail').innerHTML='<h3>'+esc(r.title)+'</h3><p>'+esc(r.typeLabel)+' · '+esc(r.authorName||r.author)+' · '+esc(r.statusLabel)+'</p><pre style="white-space:pre-wrap;font-family:inherit">'+esc([r.content,r.results,r.resultText,r.issues,r.inProgress,r.nextPlan].filter(Boolean).join('\n\n'))+'</pre>'+(r.attachments||[]).map(a=>'<p><a href="/api/reports/'+encodeURIComponent(id)+'/file?att='+encodeURIComponent(a.id)+'" target="_blank">'+esc(a.name)+'</a></p>').join('')+(d.canReview?'<div class="actions"><button class="btn primary" onclick="reviewReport(\''+id+'\',\'approve\')">승인</button><button class="btn" onclick="reviewReport(\''+id+'\',\'revision\')">보완요청</button><button class="btn" onclick="reviewReport(\''+id+'\',\'reject\')">반려</button></div>':'')+'<button type="button" class="btn" onclick="$(\'wrDetail\').hidden=true">닫기</button>';$('wrDetail').scrollIntoView({behavior:'smooth',block:'start'});}catch(e){$('wrMsg').textContent='업무보고를 열지 못했습니다: '+e.message;}}
 $('wrList').addEventListener('click',e=>{const b=e.target.closest('[data-report-id]');if(b)viewReport(b.dataset.reportId);});
 async function reviewReport(id,action){let comment='';if(action!=='approve'){comment=prompt('사유를 입력하세요.');if(!comment)return;}try{await wrApi('/api/reports/'+id+'/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,comment})});await loadReports();await viewReport(id);}catch(e){alert(e.message);}}
-function goPage(id){
+function goPage(id, options={}){
+  const target=document.getElementById(id);
+  if(!target||!target.classList.contains('page'))return;
+  const current=document.querySelector('.page.active');
+  const changed=!current||current.id!==id;
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  if(changed&&!options.fromHistory){
+    history.pushState({hyotongPage:id},'',location.pathname+location.search+'#'+encodeURIComponent(id));
+  }
   window.scrollTo(0,0);
 }
+window.addEventListener('popstate',event=>{
+  if(event.state&&event.state.hyotongPage){
+    goPage(event.state.hyotongPage,{fromHistory:true});
+    return;
+  }
+  // ERP에 직접 진입했거나 최초 진입 기록으로 돌아온 경우 공개 홈페이지로 복귀
+  if(location.pathname==='/erp'||location.pathname==='/erp/'){
+    location.replace('/');
+  }else{
+    goPage('dashboard',{fromHistory:true});
+  }
+});
 
 /* ================= 등록 / 수정 / 삭제 ================= */
 function readForm(key){
