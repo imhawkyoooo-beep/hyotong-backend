@@ -10,7 +10,7 @@
 body{margin:0;font-family:Arial,"Malgun Gothic",sans-serif;background:#f4f6f8;color:#1f2937}
 header{background:#111827;color:white;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 header h1{margin:0;font-size:22px} header small{opacity:.75}
-nav{display:flex;gap:8px;padding:12px 20px;background:white;border-bottom:1px solid #ddd;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+nav{display:flex;gap:8px;padding:12px 20px;background:white;border-bottom:1px solid #ddd;flex-wrap:wrap;position:sticky;top:0;z-index:50}\nnav button{flex-shrink:0}nav .nav-link{flex-shrink:0;display:inline-flex;align-items:center;border:1px solid #2563eb;background:#eff6ff;color:#1d4ed8;border-radius:8px;padding:9px 13px;cursor:pointer;font-size:14px;text-decoration:none;font-weight:700}nav .nav-link:hover{background:#dbeafe;text-decoration:none}
 nav button{border:1px solid #d1d5db;background:white;border-radius:8px;padding:9px 13px;cursor:pointer;font-size:14px}
 nav button.active{background:#111827;color:white;border-color:#111827}
 main{padding:22px;max-width:1400px;margin:auto}
@@ -76,7 +76,7 @@ mark{background:#fef08a;padding:0 1px}
 #dropOverlay.show{display:flex}
 #serverStatus{position:fixed;bottom:12px;right:12px;padding:10px 14px;border-radius:8px;background:#166534;color:white;z-index:9999;font-size:13px;box-shadow:0 2px 10px #0003;max-width:calc(100vw - 24px)}
 tr.editing td{background:#eff6ff}
-@media(max-width:800px){.grid2{grid-template-columns:1fr}.search-row{flex-wrap:wrap}main{padding:14px}.toolbar input{width:100%}header{padding:14px 16px}}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}.search-row{flex-wrap:wrap}main{padding:14px}.toolbar input{width:100%}header{padding:14px 16px}nav{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain}nav button,nav .nav-link{white-space:nowrap}}
 </style>
 </head>
 <body>
@@ -604,7 +604,7 @@ window.addEventListener('dragover',e=>{if(hasFiles(e))e.preventDefault()});
 window.addEventListener('dragleave',e=>{if(hasFiles(e)&&--dragDepth<=0)dragOff()});
 window.addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();dragOff();goPage('dashboard');collectDropped(e.dataTransfer).then(handleFiles)});
 
-buildPages();
+buildPages();\nconst reportNav=document.createElement("a");reportNav.className="nav-link";reportNav.href="/reports.html";reportNav.textContent="📋 업무보고";reportNav.setAttribute("aria-label","업무보고 열기");$("nav").append(reportNav);
 CATS.forEach(c=>$('docFilter').add(new Option(CAT_LABEL[c],c)));
 $('docFilter').onchange=renderFiles; $('docSearch').oninput=renderFiles;
 $('docDrop').onclick=()=>filePick.click();
