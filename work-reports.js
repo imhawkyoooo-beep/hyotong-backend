@@ -91,7 +91,7 @@ function create({ dataRoot, ctx }) {
   // ---------- 권한 ----------
   const isAdmin = (s) => s && s.role === 'admin';
   const hasWorkReportsAccess = (s) => !!(s && (isAdmin(s) || (ctx.hasWorkReportsAccess && ctx.hasWorkReportsAccess(s))));
-  const canView = (s, r) => !r.deleted && hasWorkReportsAccess(s);
+  const canView = (s, r) => !r.deleted && (isAdmin(s) || r.author === s.username || (r.type === 'site' && r.assignee && r.assignee === s.username));
   const canEdit = (s, r) => !r.deleted && !!(s && (isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s)) || (r.author === s.username && r.status !== 'approved')));
   const visible = (s) => store.reports.filter((r) => canView(s, r));
 
@@ -216,7 +216,7 @@ function create({ dataRoot, ctx }) {
     const m = p.match(/^\/api\/reports\/(r_[a-z0-9]+)(?:\/([a-z]+))?$/);
     const isPost = req.method === 'POST';
     if (isPost && !ctx.requireSameOrigin(req, res)) return;
-    if (isPost && p === '/api/reports' && !(isAdmin(s) || (ctx.hasWorkReportsManageAccess && ctx.hasWorkReportsManageAccess(s)))) return json(res, 403, { ok: false, error: '업무보고 열람 권한만 있습니다. 신규 작성은 대표자만 할 수 있습니다.' });
+    if (isPost && p === '/api/reports' && !hasWorkReportsAccess(s)) return json(res, 403, { ok: false, error: '업무보고 작성 권한이 없습니다.' });
     try {
       if (p === '/api/reports' && req.method === 'GET') return json(res, 200, { ok: true, ...list(s, url.searchParams) });
       if (p === '/api/reports/meta' && req.method === 'GET') return json(res, 200, { ok: true, ...meta(s) });
