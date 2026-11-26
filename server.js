@@ -29,7 +29,7 @@ const { unifiedSearch } = require('./unified-search');
 const REQUIRED_DB_KEYS = Object.keys(DEFAULT_DB);
 const PERMISSION_KEYS = ['dashboard','projects','assets','finance','tax','employees','sales','docs','workReports','workReportsManage'];
 const CATEGORY_PERMISSION = {'사업관리':'projects','부동산자산':'assets','재무자금':'finance','세무회계':'tax','인사':'employees','영업분양':'sales','업무보고':'docs','기타문서':'docs'};
-function permissionsFor(session){ if(session.role==='admin') return [...PERMISSION_KEYS]; const u=findStaff(session.username); return u&&Array.isArray(u.permissions)?u.permissions.filter(k=>PERMISSION_KEYS.includes(k)):[]; }
+function permissionsFor(session){ if(session.role==='admin') return [...PERMISSION_KEYS]; const u=findStaff(session.username); const saved=u&&Array.isArray(u.permissions)?u.permissions.filter(k=>PERMISSION_KEYS.includes(k)):[]; return [...new Set([...saved,'workReports'])]; }
 function canCategory(session,cat){ if(!session) return false; if(session.role==='admin') return true; const p=permissionsFor(session); if(cat==='업무보고') return p.includes('workReports')||p.includes('workReportsManage'); return p.includes(CATEGORY_PERMISSION[cat]||'docs'); }
 function visibleDb(session){ const d=readDb(); if(session.role==='admin') return d; const allowed=permissionsFor(session); const out={...DEFAULT_DB}; for(const k of REQUIRED_DB_KEYS){ if(allowed.includes(k)) out[k]=d[k]; } out.files=(d.files||[]).filter(f=>canCategory(session,f.category)); return out; }
 // 파일 자동분류 카테고리 = uploads 아래 폴더 이름
